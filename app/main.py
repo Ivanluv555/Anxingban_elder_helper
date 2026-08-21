@@ -7,17 +7,18 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
-from app.database import Base, engine
-from app.routers.cards import router as cards_router
-from app.routers.guide import router as guide_router
-from app.routers.profiles import router as profiles_router
-from app.routers.sos import router as sos_router
-from app.routers.tasks import router as tasks_router
-from app.routers.trips import router as trips_router
+from app.database import Base, engine, import_all_entities
+from app.modules.profile.controller.ProfileController import router as profile_router
+from app.modules.trip.controller.TripController import router as trip_router
+from app.modules.task.controller.TaskController import router as task_router
+from app.modules.sos.controller.SosController import router as sos_router
+from app.modules.card.controller.CardController import router as card_router
+from app.modules.guide.controller.GuideController import router as guide_router
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    import_all_entities()
     Base.metadata.create_all(bind=engine)
     yield
 
@@ -32,11 +33,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(profiles_router)
-app.include_router(trips_router)
+app.include_router(profile_router)
+app.include_router(trip_router)
+app.include_router(task_router)
 app.include_router(sos_router)
-app.include_router(tasks_router)
-app.include_router(cards_router)
+app.include_router(card_router)
 app.include_router(guide_router)
 
 static_dir = Path(__file__).parent / "static"

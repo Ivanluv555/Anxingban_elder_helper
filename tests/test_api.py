@@ -1,12 +1,34 @@
+import os
 from datetime import date
 
+import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.engine import make_url
 
-from app.database import Base, engine
+test_database_url = os.getenv("TEST_DATABASE_URL")
+if not test_database_url:
+    pytest.skip("TEST_DATABASE_URL is required for MySQL integration tests", allow_module_level=True)
+
+parsed_test_url = make_url(test_database_url)
+if parsed_test_url.drivername != "mysql+pymysql" or not (parsed_test_url.database or "").endswith("_test"):
+    raise RuntimeError("TEST_DATABASE_URL must use mysql+pymysql and a database name ending with '_test'")
+
+os.environ["DATABASE_URL"] = test_database_url
+
+from app.database import Base, engine, import_all_entities
 from app.main import app
 
-Base.metadata.create_all(bind=engine)
+import_all_entities()
+
 client = TestClient(app)
+
+
+@pytest.fixture(scope="module", autouse=True)
+def reset_test_database():
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
 
 def test_full_pilot_flow():
