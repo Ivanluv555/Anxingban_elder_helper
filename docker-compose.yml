@@ -5,17 +5,15 @@ services:
     container_name: anx-back
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      - APP_NAME=安行伴-重庆试点
-      - ENVIRONMENT=production
-      - DATABASE_URL=mysql+pymysql://root:WaterChina%40242526@47.237.188.77:3306/anbanx?charset=utf8mb4
-      - TOKEN_SECRET=replace-this-with-a-secure-random-string-in-production
-      - SMS_PROVIDER=mock
-      - PILOT_CITY=Chongqing
-      - GUIDE_SCOPE=knowledge_limited
-    restart: unless-stopped
+      # 必需的环境变量，使用 :? 语法在缺失时快速失败
+      - DATABASE_URL=${DATABASE_URL:?DATABASE_URL is required. Copy .env.example to .env and configure it.}
+      - TOKEN_SECRET=${TOKEN_SECRET:?TOKEN_SECRET is required. Copy .env.example to .env and configure it.}
+    restart: on-failure:3
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/docs" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3

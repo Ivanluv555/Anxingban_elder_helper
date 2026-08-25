@@ -4,13 +4,22 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     app_name: str = "安行伴-重庆试点"
-    environment: str = "dev"
+    environment: str = "development"
     database_url: str = "mysql+pymysql://root:password@localhost:3306/anbanx?charset=utf8mb4"
-    token_secret: str = "replace-with-secure-random-string-in-production"
+    token_secret: str = "dev-secret-change-in-production"
     wechat_webhook_url: str = ""
     sms_provider: str = "mock"
     pilot_city: str = "Chongqing"
     guide_scope: str = "knowledge_limited"
+    
+    # 日志配置
+    log_level: str = "INFO"
+    log_file: str = "logs/app.log"
+    log_max_bytes: int = 104857600  # 100MB
+    log_backup_count: int = 10
+    
+    # 端口配置
+    port: int = 8000
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

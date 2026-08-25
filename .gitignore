@@ -1,4 +1,6 @@
-# Python
+# ============================================
+# Python Backend
+# ============================================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -27,38 +29,6 @@ ENV/
 env/
 .venv
 
-# Environment Variables
-.env
-.env.local
-.env.*.local
-.env.docker
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.project
-.pydevproject
-.settings/
-
-# OS
-.DS_Store
-Thumbs.db
-Desktop.ini
-
-# Logs
-*.log
-logs/
-pip-log.txt
-pip-delete-this-directory.txt
-
 # Test coverage
 htmlcov/
 .tox/
@@ -82,14 +52,162 @@ coverage.xml
 .dmypy.json
 dmypy.json
 
+# ============================================
+# Frontend (Node.js/Vue/React)
+# ============================================
+frontend/node_modules/
+frontend/dist/
+frontend/*.log
+
+# ============================================
+# Flutter Mobile
+# ============================================
+# Miscellaneous
+mobile/anxingban/*.class
+mobile/anxingban/*.log
+mobile/anxingban/*.pyc
+mobile/anxingban/*.swp
+mobile/anxingban/.atom/
+mobile/anxingban/.build/
+mobile/anxingban/.buildlog/
+mobile/anxingban/.history
+mobile/anxingban/.svn/
+mobile/anxingban/.swiftpm/
+mobile/anxingban/migrate_working_dir/
+
+# IntelliJ related
+mobile/anxingban/*.iml
+mobile/anxingban/*.ipr
+mobile/anxingban/*.iws
+mobile/anxingban/.idea/
+
+# Flutter/Dart/Pub related
+mobile/anxingban/**/doc/api/
+mobile/anxingban/**/ios/Flutter/.last_build_id
+mobile/anxingban/.dart_tool/
+mobile/anxingban/.flutter-plugins-dependencies
+mobile/anxingban/.pub-cache/
+mobile/anxingban/.pub/
+mobile/anxingban/build/
+mobile/anxingban/coverage/
+
+# Symbolication related
+mobile/anxingban/app.*.symbols
+
+# Obfuscation related
+mobile/anxingban/app.*.map.json
+
+# Android Studio build artifacts
+mobile/anxingban/android/app/debug/
+mobile/anxingban/android/app/profile/
+mobile/anxingban/android/app/release/
+mobile/anxingban/android/gradle-wrapper.jar
+mobile/anxingban/android/.gradle/
+mobile/anxingban/android/captures/
+mobile/anxingban/android/gradlew
+mobile/anxingban/android/gradlew.bat
+mobile/anxingban/android/local.properties
+mobile/anxingban/android/GeneratedPluginRegistrant.java
+mobile/anxingban/android/.cxx/
+mobile/anxingban/android/key.properties
+mobile/anxingban/android/**/*.keystore
+mobile/anxingban/android/**/*.jks
+
+# iOS specific
+mobile/anxingban/ios/**/dgph
+mobile/anxingban/ios/*.mode1v3
+mobile/anxingban/ios/*.mode2v3
+mobile/anxingban/ios/*.moved-aside
+mobile/anxingban/ios/*.pbxuser
+mobile/anxingban/ios/*.perspectivev3
+mobile/anxingban/ios/**/*sync/
+mobile/anxingban/ios/.sconsign.dblite
+mobile/anxingban/ios/.tags*
+mobile/anxingban/ios/**/.vagrant/
+mobile/anxingban/ios/**/DerivedData/
+mobile/anxingban/ios/Icon?
+mobile/anxingban/ios/**/Pods/
+mobile/anxingban/ios/**/.symlinks/
+mobile/anxingban/ios/profile
+mobile/anxingban/ios/xcuserdata
+mobile/anxingban/ios/**/.generated/
+mobile/anxingban/ios/Flutter/App.framework
+mobile/anxingban/ios/Flutter/Flutter.framework
+mobile/anxingban/ios/Flutter/Flutter.podspec
+mobile/anxingban/ios/Flutter/Generated.xcconfig
+mobile/anxingban/ios/Flutter/ephemeral/
+mobile/anxingban/ios/Flutter/app.flx
+mobile/anxingban/ios/Flutter/app.zip
+mobile/anxingban/ios/Flutter/flutter_assets/
+mobile/anxingban/ios/Flutter/flutter_export_environment.sh
+mobile/anxingban/ios/ServiceDefinitions.json
+mobile/anxingban/ios/Runner/GeneratedPluginRegistrant.*
+
+# iOS Exceptions
+!mobile/anxingban/ios/default.mode1v3
+!mobile/anxingban/ios/default.mode2v3
+!mobile/anxingban/ios/default.pbxuser
+!mobile/anxingban/ios/default.perspectivev3
+
+# Widget Preview
+mobile/anxingban/.widget_preview/
+
+# ============================================
+# Environment Variables
+# ============================================
+.env
+.env.local
+.env.*.local
+.env.docker
+
+# ============================================
+# Database
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================
+# IDE
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ============================================
+# Logs
+# ============================================
+*.log
+logs/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ============================================
 # Backup files
+# ============================================
 *.bak
 *.backup
 *~
 
-# Docker build artifacts
+# ============================================
+# Docker
+# ============================================
 *.tar
 *.tar.gz
 
-# Legacy/deprecated code
+# ============================================
+# Legacy/Deprecated
+# ============================================
 static_legacy/
