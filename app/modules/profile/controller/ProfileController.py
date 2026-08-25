@@ -105,3 +105,45 @@ def update_profile(profile_id: int, payload: ProfileUpdateDto, db: Session = Dep
     if not profile:
         raise HTTPException(status_code=404, detail="档案不存在")
     return profile
+
+
+@router.put(
+    "/{profile_id}",
+    response_model=ProfileResponseDto,
+    summary="更新档案信息（完整更新）",
+    description="完整更新档案信息，支持PUT方法",
+    response_description="返回更新后的档案信息"
+)
+def update_profile_put(profile_id: int, payload: ProfileUpdateDto, db: Session = Depends(get_db)):
+    """更新档案信息（PUT方法）
+    
+    - **profile_id**: 档案 ID
+    - 兼容PUT方法，实际执行部分更新
+    - 可更新联系方式、健康信息、兴趣偏好
+    
+    错误：
+    - 404: 档案不存在
+    """
+    return update_profile(profile_id, payload, db)
+
+
+@router.delete(
+    "/{profile_id}",
+    summary="删除档案",
+    description="删除指定的档案记录",
+    response_description="删除成功返回成功消息"
+)
+def delete_profile(profile_id: int, db: Session = Depends(get_db)):
+    """删除档案
+    
+    - **profile_id**: 档案ID
+    
+    错误：
+    - 404: 档案不存在
+    """
+    profile = ProfileService.get_profile_by_id(db, profile_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="档案不存在")
+    
+    ProfileService.delete_profile(db, profile_id)
+    return {"message": "档案删除成功"}

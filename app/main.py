@@ -154,13 +154,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 注册路由
-app.include_router(profile_router, prefix="/api", tags=["档案管理"])
-app.include_router(trip_router, prefix="/api", tags=["行程管理"])
-app.include_router(task_router, prefix="/api", tags=["亲子任务"])
-app.include_router(sos_router, prefix="/api", tags=["紧急求助"])
-app.include_router(card_router, prefix="/api", tags=["回忆卡片"])
-app.include_router(guide_router, prefix="/api", tags=["景点讲解"])
+# 注册路由（控制器中已包含/api前缀）
+app.include_router(profile_router, tags=["档案管理"])
+app.include_router(trip_router, tags=["行程管理"])
+app.include_router(task_router, tags=["亲子任务"])
+app.include_router(sos_router, tags=["紧急求助"])
+app.include_router(card_router, tags=["回忆卡片"])
+app.include_router(guide_router, tags=["景点讲解"])
 
 logger.info(f"应用初始化完成")
 logger.info(f"API文档: http://localhost:{settings.port}/docs")

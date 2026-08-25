@@ -58,6 +58,24 @@ async def trigger_sos(payload: SosRequestDto, db: Session = Depends(get_db)):
 
 
 @router.get(
+    "",
+    response_model=list[SosResponseDto],
+    summary="获取SOS记录列表",
+    description="查询SOS记录列表，支持按档案ID筛选",
+    response_description="返回SOS记录列表，按时间倒序"
+)
+def list_all_sos(profile_id: int = None, limit: int = 100, db: Session = Depends(get_db)):
+    """获取SOS记录列表
+    
+    - **profile_id**: 可选，档案ID筛选
+    - **limit**: 返回数量限制，默认100
+    """
+    if profile_id:
+        return SosService.list_sos_by_profile(db, profile_id)
+    return SosService.list_all_sos(db, limit)
+
+
+@router.get(
     "/profile/{profile_id}",
     response_model=list[SosResponseDto],
     summary="获取 SOS 历史记录",

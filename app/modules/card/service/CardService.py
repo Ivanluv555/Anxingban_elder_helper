@@ -39,3 +39,21 @@ class CardService:
     @staticmethod
     def list_cards_by_trip(db: Session, trip_id: int) -> list[MemoryCardEntity]:
         return list(db.scalars(select(MemoryCardEntity).where(MemoryCardEntity.trip_id == trip_id).order_by(MemoryCardEntity.id.desc())).all())
+
+    @staticmethod
+    def list_cards_by_profile(db: Session, profile_id: int) -> list[MemoryCardEntity]:
+        # 通过trip_id关联查询
+        from app.modules.trip.entity.TripEntity import TripEntity
+        stmt = select(MemoryCardEntity).join(TripEntity).where(TripEntity.profile_id == profile_id).order_by(MemoryCardEntity.id.desc())
+        return list(db.scalars(stmt).all())
+
+    @staticmethod
+    def list_all_cards(db: Session, limit: int = 100) -> list[MemoryCardEntity]:
+        return list(db.scalars(select(MemoryCardEntity).order_by(MemoryCardEntity.id.desc()).limit(limit)).all())
+
+    @staticmethod
+    def delete_card(db: Session, card_id: int) -> None:
+        card = db.get(MemoryCardEntity, card_id)
+        if card:
+            db.delete(card)
+            db.commit()

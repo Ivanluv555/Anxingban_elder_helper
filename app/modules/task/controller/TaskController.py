@@ -91,6 +91,45 @@ def feedback_task(task_id: int, payload: TaskFeedbackDto, db: Session = Depends(
 
 
 @router.get(
+    "",
+    response_model=list[TaskResponseDto],
+    summary="获取任务列表",
+    description="查询任务列表，支持按档案ID筛选",
+    response_description="返回任务列表，按创建时间倒序"
+)
+def list_all_tasks(profile_id: int = None, limit: int = 100, db: Session = Depends(get_db)):
+    """获取任务列表
+    
+    - **profile_id**: 可选，档案ID筛选
+    - **limit**: 返回数量限制，默认100
+    """
+    if profile_id:
+        return TaskService.list_tasks_by_profile(db, profile_id)
+    return TaskService.list_all_tasks(db, limit)
+
+
+@router.get(
+    "/{task_id}",
+    response_model=TaskResponseDto,
+    summary="获取任务详情",
+    description="查询单个任务的详细信息",
+    response_description="返回任务详情"
+)
+def get_task(task_id: int, db: Session = Depends(get_db)):
+    """获取任务详情
+    
+    - **task_id**: 任务ID
+    
+    错误：
+    - 404: 任务不存在
+    """
+    task = TaskService.get_task_by_id(db, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="任务不存在")
+    return task
+
+
+@router.get(
     "/profile/{profile_id}",
     response_model=list[TaskResponseDto],
     summary="获取档案任务列表",
@@ -105,3 +144,25 @@ def list_tasks(profile_id: int, db: Session = Depends(get_db)):
     - 包含任务状态、完成情况、爱心值
     """
     return TaskService.list_tasks_by_profile(db, profile_id)
+
+
+@router.delete(
+    "/{task_id}",
+    summary="删除任务",
+    description="删除指定的任务记录",
+    response_description="删除成功返回成功消息"
+)
+def delete_task(task_id: int, db: Session = Depends(get_db)):
+    """删除任务
+    
+    - **task_id**: 任务ID
+    
+    错误：
+    - 404: 任务不存在
+    """
+    task = TaskService.get_task_by_id(db, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="任务不存在")
+    
+    TaskService.delete_task(db, task_id)
+    return {"message": "任务删除成功"}

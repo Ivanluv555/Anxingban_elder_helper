@@ -51,3 +51,14 @@ class TaskService:
     @staticmethod
     def list_tasks_by_profile(db: Session, profile_id: int) -> list[TaskEntity]:
         return list(db.scalars(select(TaskEntity).where(TaskEntity.profile_id == profile_id).order_by(TaskEntity.id.desc())).all())
+
+    @staticmethod
+    def list_all_tasks(db: Session, limit: int = 100) -> list[TaskEntity]:
+        return list(db.scalars(select(TaskEntity).order_by(TaskEntity.id.desc()).limit(limit)).all())
+
+    @staticmethod
+    def delete_task(db: Session, task_id: int) -> None:
+        task = db.get(TaskEntity, task_id)
+        if task:
+            db.delete(task)
+            db.commit()

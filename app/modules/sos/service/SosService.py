@@ -47,3 +47,7 @@ class SosService:
     @staticmethod
     def list_sos_by_profile(db: Session, profile_id: int) -> list[SosRecordEntity]:
         return list(db.scalars(select(SosRecordEntity).where(SosRecordEntity.profile_id == profile_id).order_by(SosRecordEntity.id.desc())).all())
+
+    @staticmethod
+    def list_all_sos(db: Session, limit: int = 100) -> list[SosRecordEntity]:
+        return list(db.scalars(select(SosRecordEntity).order_by(SosRecordEntity.id.desc()).limit(limit)).all())

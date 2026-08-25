@@ -34,3 +34,14 @@ class TripService:
     @staticmethod
     def list_trips_by_profile(db: Session, profile_id: int) -> list[TripEntity]:
         return list(db.scalars(select(TripEntity).where(TripEntity.profile_id == profile_id).order_by(TripEntity.id.desc())).all())
+
+    @staticmethod
+    def list_all_trips(db: Session, limit: int = 100) -> list[TripEntity]:
+        return list(db.scalars(select(TripEntity).order_by(TripEntity.id.desc()).limit(limit)).all())
+
+    @staticmethod
+    def delete_trip(db: Session, trip_id: int) -> None:
+        trip = db.get(TripEntity, trip_id)
+        if trip:
+            db.delete(trip)
+            db.commit()

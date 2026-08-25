@@ -64,6 +64,27 @@ def get_card(card_id: int, db: Session = Depends(get_db)):
 
 
 @router.get(
+    "",
+    response_model=list[CardResponseDto],
+    summary="获取卡片列表",
+    description="查询卡片列表，支持按档案ID或行程ID筛选",
+    response_description="返回卡片列表，按创建时间倒序"
+)
+def list_cards(profile_id: int = None, trip_id: int = None, limit: int = 100, db: Session = Depends(get_db)):
+    """获取卡片列表
+    
+    - **profile_id**: 可选，档案ID筛选
+    - **trip_id**: 可选，行程ID筛选
+    - **limit**: 返回数量限制，默认100
+    """
+    if trip_id:
+        return CardService.list_cards_by_trip(db, trip_id)
+    elif profile_id:
+        return CardService.list_cards_by_profile(db, profile_id)
+    return CardService.list_all_cards(db, limit)
+
+
+@router.get(
     "/trip/{trip_id}",
     response_model=list[CardResponseDto],
     summary="获取行程卡片列表",
@@ -78,3 +99,25 @@ def list_cards_by_trip(trip_id: int, db: Session = Depends(get_db)):
     - 按创建时间倒序排列
     """
     return CardService.list_cards_by_trip(db, trip_id)
+
+
+@router.delete(
+    "/{card_id}",
+    summary="删除卡片",
+    description="删除指定的回忆卡片",
+    response_description="删除成功返回成功消息"
+)
+def delete_card(card_id: int, db: Session = Depends(get_db)):
+    """删除卡片
+    
+    - **card_id**: 卡片ID
+    
+    错误：
+    - 404: 卡片不存在
+    """
+    card = CardService.get_card_by_id(db, card_id)
+    if not card:
+        raise HTTPException(status_code=404, detail="卡片不存在")
+    
+    CardService.delete_card(db, card_id)
+    return {"message": "卡片删除成功"}

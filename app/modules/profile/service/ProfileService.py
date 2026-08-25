@@ -71,3 +71,10 @@ class ProfileService:
         db.commit()
         db.refresh(profile)
         return profile
+
+    @staticmethod
+    def delete_profile(db: Session, profile_id: int) -> None:
+        profile = db.get(ProfileEntity, profile_id)
+        if profile:
+            db.delete(profile)
+            db.commit()
