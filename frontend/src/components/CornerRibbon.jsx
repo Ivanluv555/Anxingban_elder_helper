@@ -1,25 +1,6 @@
-import { useEffect, useState } from 'react';
-
-export function CornerRibbon({ appEntered }) {
-    const [isDrawing, setIsDrawing] = useState(false);
-
-    useEffect(() => {
-        if (appEntered) {
-            const timer = setTimeout(() => {
-                setIsDrawing(true);
-                setTimeout(() => setIsDrawing(false), 1250);
-            }, 100);
-            return () => clearTimeout(timer);
-        }
-    }, [appEntered]);
-
-    const redraw = () => {
-        setIsDrawing(true);
-        setTimeout(() => setIsDrawing(false), 1250);
-    };
-
+export const CornerRibbon = () => {
     return (
-        <div className={`corner-ribbon ${isDrawing ? 'is-drawing' : ''}`} onClick={redraw}>
+        <div className="corner-ribbon" aria-hidden="true">
             <svg viewBox="0 0 120 120" role="presentation" focusable="false">
                 <defs>
                     <linearGradient id="ribbon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -33,4 +14,4 @@ export function CornerRibbon({ appEntered }) {
             </svg>
         </div>
     );
-}
+};

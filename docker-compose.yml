@@ -1,0 +1,28 @@
+services:
+  backend:
+    build: .
+    image: anxingban-backend:latest
+    container_name: anx-back
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=安行伴-重庆试点
+      - ENVIRONMENT=production
+      - DATABASE_URL=mysql+pymysql://root:WaterChina%40242526@47.237.188.77:3306/anbanx?charset=utf8mb4
+      - TOKEN_SECRET=replace-this-with-a-secure-random-string-in-production
+      - SMS_PROVIDER=mock
+      - PILOT_CITY=Chongqing
+      - GUIDE_SCOPE=knowledge_limited
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/docs" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - anxingban-network
+
+networks:
+  anxingban-network:
+    driver: bridge

@@ -31,6 +31,7 @@ env/
 .env
 .env.local
 .env.*.local
+.env.docker
 
 # Database
 *.db
@@ -85,3 +86,10 @@ dmypy.json
 *.bak
 *.backup
 *~
+
+# Docker build artifacts
+*.tar
+*.tar.gz
+
+# Legacy/deprecated code
+static_legacy/

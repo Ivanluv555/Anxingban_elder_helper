@@ -1,4 +1,4 @@
-export function LiquidOrbs() {
+export const LiquidOrbs = () => {
     return (
         <>
             <div className="liquid-orb orb-a"></div>
@@ -6,4 +6,4 @@ export function LiquidOrbs() {
             <div className="liquid-orb orb-c"></div>
         </>
     );
-}
+};

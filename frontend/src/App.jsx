@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import './App.css';
 import { ToastProvider } from './components/Toast';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { LiquidOrbs } from './components/LiquidOrbs';
@@ -20,139 +19,59 @@ function App() {
     const [profileId, setProfileId] = useState(null);
     const [tripId, setTripId] = useState(null);
     const [taskId, setTaskId] = useState(null);
-    const [presetDestination, setPresetDestination] = useState('');
-
-    useEffect(() => {
-        const hash = window.location.hash.replace('#', '');
-        if (hash && appEntered) {
-            setCurrentView(hash);
-        }
-    }, [appEntered]);
-
-    useEffect(() => {
-        if (appEntered) {
-            const bodyClasses = document.body.classList;
-            bodyClasses.remove('view-home-active', 'view-sub-active');
-            if (currentView === 'home') {
-                bodyClasses.add('view-home-active');
-            } else {
-                bodyClasses.add('view-sub-active');
-            }
-
-            const hash = currentView === 'home' ? '' : `#${currentView}`;
-            window.history.pushState(null, '', `${window.location.pathname}${hash}`);
-        }
-    }, [currentView, appEntered]);
 
     useEffect(() => {
         if (appEntered) {
             document.body.classList.add('app-entered');
+            if (currentView === 'home') {
+                document.body.classList.add('view-home-active');
+                document.body.classList.remove('view-sub-active');
+            } else {
+                document.body.classList.add('view-sub-active');
+                document.body.classList.remove('view-home-active');
+            }
         }
-    }, [appEntered]);
+    }, [appEntered, currentView]);
 
-    const handleNavigate = (view) => {
-        setCurrentView(view);
-    };
-
-    const handleAddToTrip = (destination) => {
-        setPresetDestination(destination);
-    };
+    const handleNavigate = (view) => setCurrentView(view);
 
     const renderView = () => {
+        const props = { onNavigate: handleNavigate, profileId, tripId, taskId };
         switch (currentView) {
             case 'home':
-                return <HomeView onNavigate={handleNavigate} />;
+                return <HomeView {...props} />;
             case 'profile':
-                return <ProfileView onNavigate={handleNavigate} onProfileCreated={setProfileId} />;
+                return <ProfileView {...props} onProfileCreated={setProfileId} />;
             case 'trip':
-                return (
-                    <TripView
-                        onNavigate={handleNavigate}
-                        profileId={profileId}
-                        onTripCreated={setTripId}
-                        presetDestination={presetDestination}
-                    />
-                );
+                return <TripView {...props} onTripCreated={setTripId} />;
             case 'sos':
-                return <SOSView onNavigate={handleNavigate} profileId={profileId} tripId={tripId} />;
+                return <SOSView {...props} />;
             case 'task':
-                return (
-                    <TaskView
-                        onNavigate={handleNavigate}
-                        profileId={profileId}
-                        tripId={tripId}
-                        onTaskCreated={setTaskId}
-                    />
-                );
+                return <TaskView {...props} onTaskCreated={setTaskId} />;
             case 'guide':
-                return <GuideView onNavigate={handleNavigate} />;
+                return <GuideView {...props} />;
             case 'card':
-                return <CardView onNavigate={handleNavigate} tripId={tripId} />;
+                return <CardView {...props} />;
             case 'scenic-list':
-                return <ScenicListView onNavigate={handleNavigate} />;
+                return <ScenicListView {...props} />;
             case 'scenic-hongyadong':
             case 'scenic-ciqikou':
             case 'scenic-wulong':
             case 'scenic-cableway':
-                return (
-                    <ScenicDetailView
-                        scenic={currentView}
-                        onNavigate={handleNavigate}
-                        onAddToTrip={handleAddToTrip}
-                    />
-                );
+                return <ScenicDetailView {...props} scenic={currentView} />;
             default:
-                return <HomeView onNavigate={handleNavigate} />;
+                return <HomeView {...props} />;
         }
     };
 
-    const dockItems = [
-        { view: 'profile', label: '建档' },
-        { view: 'trip', label: '行程' },
-        { view: 'sos', label: 'SOS' },
-        { view: 'task', label: '任务' },
-        { view: 'guide', label: '导游' },
-        { view: 'card', label: '卡片' },
-    ];
-
     return (
         <ToastProvider>
-            <LiquidOrbs />
-            <CornerRibbon appEntered={appEntered} />
-
             {!appEntered && <WelcomeScreen onEnter={() => setAppEntered(true)} />}
-
+            <LiquidOrbs />
+            <CornerRibbon />
             <div className="device-shell">
-                <Header
-                    currentView={currentView}
-                    profileId={profileId}
-                    tripId={tripId}
-                    taskId={taskId}
-                />
-
-                <main className="app-views" id="app-views">
-                    <section className={`view ${currentView === 'home' ? 'active' : ''}`} id="view-home">
-                        {currentView === 'home' && renderView()}
-                    </section>
-                    <section className={`view ${currentView !== 'home' ? 'active' : ''}`}>
-                        {currentView !== 'home' && renderView()}
-                    </section>
-                </main>
-
-                {currentView !== 'home' && (
-                    <div className="bottom-dock glass-panel">
-                        {dockItems.map((item) => (
-                            <button
-                                key={item.view}
-                                type="button"
-                                className={`dock-item ${currentView === item.view ? 'active' : ''}`}
-                                onClick={() => handleNavigate(item.view)}
-                            >
-                                {item.label}
-                            </button>
-                        ))}
-                    </div>
-                )}
+                <Header currentView={currentView} profileId={profileId} tripId={tripId} taskId={taskId} />
+                <main className="app-views">{renderView()}</main>
             </div>
         </ToastProvider>
     );
