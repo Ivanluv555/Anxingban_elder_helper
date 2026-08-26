@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_url: str = "mysql+pymysql://root:password@localhost:3306/anbanx?charset=utf8mb4"
     token_secret: str = "dev-secret-change-in-production"
+    secret_key: str = "your-secret-key-change-in-production-jwt-signing"
     wechat_webhook_url: str = ""
     sms_provider: str = "mock"
     pilot_city: str = "Chongqing"

@@ -10,12 +10,24 @@ from app.config import settings
 from app.database import Base, engine, import_all_entities, SessionLocal
 from app.logger import get_logger, setup_logging
 from app.error_codes import BusinessException, ErrorCode, get_error_response
+
+# 认证模块
+from app.modules.auth.controller.AuthController import router as auth_router
+
+# 子女用户API
 from app.modules.profile.controller.ProfileController import router as profile_router
 from app.modules.trip.controller.TripController import router as trip_router
 from app.modules.task.controller.TaskController import router as task_router
 from app.modules.sos.controller.SosController import router as sos_router
 from app.modules.card.controller.CardController import router as card_router
-from app.modules.guide.controller.GuideController import router as guide_router
+
+# 老人用户API
+from app.modules.profile.controller.ProfileElderController import router as profile_elder_router
+from app.modules.trip.controller.TripElderController import router as trip_elder_router
+from app.modules.task.controller.TaskElderController import router as task_elder_router
+from app.modules.sos.controller.SosElderController import router as sos_elder_router
+from app.modules.card.controller.CardElderController import router as card_elder_router
+from app.modules.guide.controller.GuideElderController import router as guide_elder_router
 
 # 初始化日志
 setup_logging()
@@ -154,13 +166,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 注册路由（控制器中已包含/api前缀）
-app.include_router(profile_router, tags=["档案管理"])
-app.include_router(trip_router, tags=["行程管理"])
-app.include_router(task_router, tags=["亲子任务"])
-app.include_router(sos_router, tags=["紧急求助"])
-app.include_router(card_router, tags=["回忆卡片"])
-app.include_router(guide_router, tags=["景点讲解"])
+# 注册路由
+# 认证API
+app.include_router(auth_router)
+
+# 子女用户API（完整权限）
+app.include_router(profile_router)
+app.include_router(trip_router)
+app.include_router(task_router)
+app.include_router(sos_router)
+app.include_router(card_router)
+
+# 老人用户API（受限权限）
+app.include_router(profile_elder_router)
+app.include_router(trip_elder_router)
+app.include_router(task_elder_router)
+app.include_router(sos_elder_router)
+app.include_router(card_elder_router)
+app.include_router(guide_elder_router)
 
 logger.info(f"应用初始化完成")
 logger.info(f"API文档: http://localhost:{settings.port}/docs")

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.modules.auth.dependencies import get_current_user
 from app.modules.task.dto.TaskDto import (
     TaskCompleteDto,
     TaskCreateDto,
@@ -12,7 +13,7 @@ from app.modules.task.service.TaskService import TaskService
 from app.modules.profile.service.ProfileService import ProfileService
 from app.modules.trip.service.TripService import TripService
 
-router = APIRouter(prefix="/api/tasks", tags=["亲子任务"])
+router = APIRouter(prefix="/api/user/tasks", tags=["子女-亲子任务"])
 
 
 @router.post(
@@ -22,7 +23,11 @@ router = APIRouter(prefix="/api/tasks", tags=["亲子任务"])
     description="为指定行程创建亲子互动任务",
     response_description="返回创建的任务信息"
 )
-def create_task(payload: TaskCreateDto, db: Session = Depends(get_db)):
+def create_task(
+    payload: TaskCreateDto,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """创建亲子任务
     
     功能：
@@ -49,7 +54,12 @@ def create_task(payload: TaskCreateDto, db: Session = Depends(get_db)):
     description="标记任务为已完成，可上传完成备注和照片",
     response_description="返回更新后的任务信息"
 )
-def complete_task(task_id: int, payload: TaskCompleteDto, db: Session = Depends(get_db)):
+def complete_task(
+    task_id: int,
+    payload: TaskCompleteDto,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """完成任务
     
     - **task_id**: 任务 ID
@@ -73,7 +83,12 @@ def complete_task(task_id: int, payload: TaskCompleteDto, db: Session = Depends(
     description="家长对任务完成情况进行反馈，可给予爱心奖励",
     response_description="返回更新后的任务信息"
 )
-def feedback_task(task_id: int, payload: TaskFeedbackDto, db: Session = Depends(get_db)):
+def feedback_task(
+    task_id: int,
+    payload: TaskFeedbackDto,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """任务反馈
     
     - **task_id**: 任务 ID
@@ -97,7 +112,12 @@ def feedback_task(task_id: int, payload: TaskFeedbackDto, db: Session = Depends(
     description="查询任务列表，支持按档案ID筛选",
     response_description="返回任务列表，按创建时间倒序"
 )
-def list_all_tasks(profile_id: int = None, limit: int = 100, db: Session = Depends(get_db)):
+def list_all_tasks(
+    profile_id: int = None,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """获取任务列表
     
     - **profile_id**: 可选，档案ID筛选
@@ -115,7 +135,11 @@ def list_all_tasks(profile_id: int = None, limit: int = 100, db: Session = Depen
     description="查询单个任务的详细信息",
     response_description="返回任务详情"
 )
-def get_task(task_id: int, db: Session = Depends(get_db)):
+def get_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """获取任务详情
     
     - **task_id**: 任务ID
@@ -136,7 +160,11 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
     description="查询指定档案的所有任务，按创建时间倒序",
     response_description="返回任务列表"
 )
-def list_tasks(profile_id: int, db: Session = Depends(get_db)):
+def list_tasks(
+    profile_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """获取任务列表
     
     - **profile_id**: 档案 ID
@@ -152,7 +180,11 @@ def list_tasks(profile_id: int, db: Session = Depends(get_db)):
     description="删除指定的任务记录",
     response_description="删除成功返回成功消息"
 )
-def delete_task(task_id: int, db: Session = Depends(get_db)):
+def delete_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """删除任务
     
     - **task_id**: 任务ID

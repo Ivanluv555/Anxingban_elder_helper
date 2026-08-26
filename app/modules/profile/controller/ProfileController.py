@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.modules.auth.dependencies import get_current_user
 from app.modules.profile.dto.ProfileDto import (
     ProfileCreateDto,
     ProfileResponseDto,
@@ -9,7 +10,7 @@ from app.modules.profile.dto.ProfileDto import (
 )
 from app.modules.profile.service.ProfileService import ProfileService
 
-router = APIRouter(prefix="/api/profiles", tags=["档案管理"])
+router = APIRouter(prefix="/api/user/profiles", tags=["子女-档案管理"])
 
 
 @router.get(
@@ -21,7 +22,8 @@ router = APIRouter(prefix="/api/profiles", tags=["档案管理"])
 )
 def list_profiles(
     limit: int = 20,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
     """获取档案列表
     
@@ -37,7 +39,11 @@ def list_profiles(
     description="创建新的家庭协同建档，记录长辈和子女信息、健康状况、兴趣偏好",
     response_description="返回创建成功的档案信息，包含自动生成的档案 ID"
 )
-def create_profile(payload: ProfileCreateDto, db: Session = Depends(get_db)):
+def create_profile(
+    payload: ProfileCreateDto,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """创建家庭档案
     
     记录内容：
@@ -69,7 +75,11 @@ def create_profile(payload: ProfileCreateDto, db: Session = Depends(get_db)):
     description="根据档案 ID 查询档案完整信息",
     response_description="返回档案详细信息"
 )
-def get_profile(profile_id: int, db: Session = Depends(get_db)):
+def get_profile(
+    profile_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """获取档案详情
     
     - **profile_id**: 档案 ID
@@ -90,7 +100,12 @@ def get_profile(profile_id: int, db: Session = Depends(get_db)):
     description="部分更新档案信息，仅更新提供的字段",
     response_description="返回更新后的档案信息"
 )
-def update_profile(profile_id: int, payload: ProfileUpdateDto, db: Session = Depends(get_db)):
+def update_profile(
+    profile_id: int,
+    payload: ProfileUpdateDto,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """更新档案信息
     
     - **profile_id**: 档案 ID
@@ -114,7 +129,12 @@ def update_profile(profile_id: int, payload: ProfileUpdateDto, db: Session = Dep
     description="完整更新档案信息，支持PUT方法",
     response_description="返回更新后的档案信息"
 )
-def update_profile_put(profile_id: int, payload: ProfileUpdateDto, db: Session = Depends(get_db)):
+def update_profile_put(
+    profile_id: int,
+    payload: ProfileUpdateDto,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """更新档案信息（PUT方法）
     
     - **profile_id**: 档案 ID
@@ -133,7 +153,11 @@ def update_profile_put(profile_id: int, payload: ProfileUpdateDto, db: Session =
     description="删除指定的档案记录",
     response_description="删除成功返回成功消息"
 )
-def delete_profile(profile_id: int, db: Session = Depends(get_db)):
+def delete_profile(
+    profile_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """删除档案
     
     - **profile_id**: 档案ID

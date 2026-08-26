@@ -22,6 +22,8 @@ def get_db():
 
 
 def import_all_entities():
+    from app.modules.auth.entity.UserEntity import UserEntity
+    from app.modules.auth.entity.ElderEntity import ElderEntity
     from app.modules.profile.entity.ProfileEntity import ProfileEntity
     from app.modules.trip.entity.TripEntity import TripEntity
     from app.modules.task.entity.TaskEntity import TaskEntity

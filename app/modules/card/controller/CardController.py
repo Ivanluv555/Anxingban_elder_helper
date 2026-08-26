@@ -2,11 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.modules.auth.dependencies import get_current_user
 from app.modules.card.dto.CardDto import CardGenerateDto, CardResponseDto
 from app.modules.card.service.CardService import CardService
 from app.modules.trip.service.TripService import TripService
 
-router = APIRouter(prefix="/api/cards", tags=["回忆卡片"])
+router = APIRouter(prefix="/api/user/cards", tags=["子女-回忆卡片"])
 
 
 @router.post(
@@ -16,7 +17,11 @@ router = APIRouter(prefix="/api/cards", tags=["回忆卡片"])
     description="为指定行程生成回忆卡片，汇总行程信息和已完成任务",
     response_description="返回生成的卡片信息，包含 JSON 格式数据"
 )
-def generate_card(payload: CardGenerateDto, db: Session = Depends(get_db)):
+def generate_card(
+    payload: CardGenerateDto,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """生成回忆卡片
     
     功能：
@@ -49,7 +54,11 @@ def generate_card(payload: CardGenerateDto, db: Session = Depends(get_db)):
     description="根据卡片 ID 查询卡片完整信息",
     response_description="返回卡片详细信息"
 )
-def get_card(card_id: int, db: Session = Depends(get_db)):
+def get_card(
+    card_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """获取卡片详情
     
     - **card_id**: 卡片 ID
@@ -70,7 +79,13 @@ def get_card(card_id: int, db: Session = Depends(get_db)):
     description="查询卡片列表，支持按档案ID或行程ID筛选",
     response_description="返回卡片列表，按创建时间倒序"
 )
-def list_cards(profile_id: int = None, trip_id: int = None, limit: int = 100, db: Session = Depends(get_db)):
+def list_cards(
+    profile_id: int = None,
+    trip_id: int = None,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """获取卡片列表
     
     - **profile_id**: 可选，档案ID筛选
@@ -91,7 +106,11 @@ def list_cards(profile_id: int = None, trip_id: int = None, limit: int = 100, db
     description="查询指定行程的所有回忆卡片，按创建时间倒序",
     response_description="返回卡片列表"
 )
-def list_cards_by_trip(trip_id: int, db: Session = Depends(get_db)):
+def list_cards_by_trip(
+    trip_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """获取行程卡片列表
     
     - **trip_id**: 行程 ID
@@ -107,7 +126,11 @@ def list_cards_by_trip(trip_id: int, db: Session = Depends(get_db)):
     description="删除指定的回忆卡片",
     response_description="删除成功返回成功消息"
 )
-def delete_card(card_id: int, db: Session = Depends(get_db)):
+def delete_card(
+    card_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     """删除卡片
     
     - **card_id**: 卡片ID
