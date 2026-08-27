@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.error_codes import BusinessException, ErrorCode
 from app.modules.auth.dependencies import get_current_user
 from app.modules.card.dto.CardDto import CardGenerateDto, CardResponseDto
 from app.modules.card.service.CardService import CardService
@@ -41,7 +42,7 @@ def generate_card(
     """
     trip = TripService.get_trip_by_id(db, payload.trip_id)
     if not trip:
-        raise HTTPException(status_code=404, detail="行程不存在")
+        raise BusinessException(ErrorCode.TRIP_NOT_FOUND)
 
     card = CardService.generate_card(db, payload.trip_id, payload.title, payload.image_url, trip)
     return card
@@ -68,7 +69,7 @@ def get_card(
     """
     card = CardService.get_card_by_id(db, card_id)
     if not card:
-        raise HTTPException(status_code=404, detail="卡片不存在")
+        raise BusinessException(ErrorCode.CARD_NOT_FOUND)
     return card
 
 
@@ -140,7 +141,7 @@ def delete_card(
     """
     card = CardService.get_card_by_id(db, card_id)
     if not card:
-        raise HTTPException(status_code=404, detail="卡片不存在")
+        raise BusinessException(ErrorCode.CARD_NOT_FOUND)
     
     CardService.delete_card(db, card_id)
     return {"message": "卡片删除成功"}

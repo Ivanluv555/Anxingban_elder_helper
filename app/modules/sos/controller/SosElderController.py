@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.error_codes import BusinessException, ErrorCode
 from app.modules.auth.dependencies import get_current_elder
 from app.modules.sos.dto.SosDto import SosResponseDto, SosRequestDto
 from app.modules.sos.service.SosService import SosService
@@ -25,7 +26,7 @@ async def trigger_sos(
     from app.modules.profile.service.ProfileService import ProfileService
     profile = ProfileService.get_profile_by_id(db, payload.profile_id)
     if not profile:
-        raise HTTPException(status_code=404, detail="档案不存在")
+        raise BusinessException(ErrorCode.PROFILE_NOT_BOUND)
     
     # 获取elder信息作为profile_entity传递
     from app.modules.auth.service.AuthService import AuthService

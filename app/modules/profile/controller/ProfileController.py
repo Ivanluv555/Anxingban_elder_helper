@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.error_codes import BusinessException, ErrorCode
 from app.modules.auth.dependencies import get_current_user
 from app.modules.profile.dto.ProfileDto import (
     ProfileCreateDto,
@@ -89,7 +90,7 @@ def get_profile(
     """
     profile = ProfileService.get_profile_by_id(db, profile_id)
     if not profile:
-        raise HTTPException(status_code=404, detail="档案不存在")
+        raise BusinessException(ErrorCode.PROFILE_NOT_FOUND)
     return profile
 
 
@@ -118,7 +119,7 @@ def update_profile(
     update_data = payload.model_dump(exclude_unset=True)
     profile = ProfileService.update_profile(db, profile_id, **update_data)
     if not profile:
-        raise HTTPException(status_code=404, detail="档案不存在")
+        raise BusinessException(ErrorCode.PROFILE_NOT_FOUND)
     return profile
 
 
@@ -167,7 +168,7 @@ def delete_profile(
     """
     profile = ProfileService.get_profile_by_id(db, profile_id)
     if not profile:
-        raise HTTPException(status_code=404, detail="档案不存在")
+        raise BusinessException(ErrorCode.PROFILE_NOT_FOUND)
     
     ProfileService.delete_profile(db, profile_id)
     return {"message": "档案删除成功"}

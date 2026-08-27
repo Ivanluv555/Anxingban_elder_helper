@@ -4,6 +4,7 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.error_codes import BusinessException, ErrorCode
 from app.modules.auth.dto.AuthDto import RegisterElderRequest, RegisterUserRequest
 from app.modules.auth.entity.ElderEntity import ElderEntity
 from app.modules.auth.entity.UserEntity import UserEntity
@@ -17,11 +18,11 @@ class AuthService:
         """注册子女用户"""
         is_valid, message = validate_password_complexity(request.password)
         if not is_valid:
-            raise ValueError(message)
+            raise BusinessException(ErrorCode.VALIDATION_ERROR, detail=message)
         
         existing_user = db.scalar(select(UserEntity).where(UserEntity.phone == request.phone))
         if existing_user:
-            raise ValueError("该手机号已注册")
+            raise BusinessException(ErrorCode.CONFLICT, detail="该手机号已注册")
         
         user = UserEntity(
             nickname=request.nickname,
@@ -40,11 +41,11 @@ class AuthService:
         """注册老人用户"""
         is_valid, message = validate_password_complexity(request.password)
         if not is_valid:
-            raise ValueError(message)
+            raise BusinessException(ErrorCode.VALIDATION_ERROR, detail=message)
         
         existing_elder = db.scalar(select(ElderEntity).where(ElderEntity.phone == request.phone))
         if existing_elder:
-            raise ValueError("该手机号已注册")
+            raise BusinessException(ErrorCode.CONFLICT, detail="该手机号已注册")
         
         elder = ElderEntity(
             name=request.name,
@@ -66,7 +67,7 @@ class AuthService:
         """子女用户登录"""
         user = db.scalar(select(UserEntity).where(UserEntity.phone == phone))
         if not user or not verify_password(password, user.password_hash):
-            raise ValueError("手机号或密码错误")
+            raise BusinessException(ErrorCode.UNAUTHORIZED, detail="手机号或密码错误")
         
         user.last_login_at = datetime.utcnow()
         db.commit()
@@ -80,7 +81,7 @@ class AuthService:
         """老人用户登录"""
         elder = db.scalar(select(ElderEntity).where(ElderEntity.phone == phone))
         if not elder or not verify_password(password, elder.password_hash):
-            raise ValueError("手机号或密码错误")
+            raise BusinessException(ErrorCode.UNAUTHORIZED, detail="手机号或密码错误")
         
         elder.last_login_at = datetime.utcnow()
         db.commit()

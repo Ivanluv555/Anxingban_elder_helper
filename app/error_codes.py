@@ -32,6 +32,7 @@ class ErrorCode(str, Enum):
     CARD_NOT_FOUND = "CARD_NOT_FOUND"                # 1008 - 卡片不存在
     GUIDE_SERVICE_ERROR = "GUIDE_SERVICE_ERROR"      # 1009 - 导游服务错误
     INVALID_PHONE_FORMAT = "INVALID_PHONE_FORMAT"    # 1010 - 手机号格式错误
+    PROFILE_NOT_BOUND = "PROFILE_NOT_BOUND"          # 1011 - 档案未绑定
     
     # 服务器错误 (500-599)
     INTERNAL_ERROR = "INTERNAL_ERROR"                 # 500 - 服务器内部错误
@@ -65,6 +66,7 @@ ERROR_CODE_HTTP_STATUS: Dict[ErrorCode, int] = {
     ErrorCode.CARD_NOT_FOUND: 404,
     ErrorCode.GUIDE_SERVICE_ERROR: 500,
     ErrorCode.INVALID_PHONE_FORMAT: 400,
+    ErrorCode.PROFILE_NOT_BOUND: 404,
     
     # 服务器错误
     ErrorCode.INTERNAL_ERROR: 500,
@@ -99,6 +101,7 @@ ERROR_CODE_MESSAGE: Dict[ErrorCode, str] = {
     ErrorCode.CARD_NOT_FOUND: "卡片不存在",
     ErrorCode.GUIDE_SERVICE_ERROR: "导游服务异常",
     ErrorCode.INVALID_PHONE_FORMAT: "手机号格式错误",
+    ErrorCode.PROFILE_NOT_BOUND: "绑定子女账号，享受安全出行",
     
     # 服务器错误
     ErrorCode.INTERNAL_ERROR: "服务器内部错误",

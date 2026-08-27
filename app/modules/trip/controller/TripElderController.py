@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.error_codes import BusinessException, ErrorCode
 from app.modules.auth.dependencies import get_current_elder
 from app.modules.trip.dto.TripDto import TripResponseDto
 from app.modules.trip.service.TripService import TripService
@@ -23,7 +24,7 @@ def get_trip(
     """获取行程详情"""
     trip = TripService.get_trip_by_id(db, trip_id)
     if not trip:
-        raise HTTPException(status_code=404, detail="行程不存在")
+        raise BusinessException(ErrorCode.TRIP_NOT_FOUND)
     return trip
 
 
@@ -60,5 +61,5 @@ def get_trip_pass(
     """获取行程通行码"""
     trip = TripService.get_trip_by_id(db, trip_id)
     if not trip:
-        raise HTTPException(status_code=404, detail="行程不存在")
+        raise BusinessException(ErrorCode.TRIP_NOT_FOUND)
     return trip

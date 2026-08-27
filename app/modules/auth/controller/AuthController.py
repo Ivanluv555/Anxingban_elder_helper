@@ -24,16 +24,13 @@ router = APIRouter(prefix="/api/auth", tags=["认证"])
 )
 def register_user(request: RegisterUserRequest, db: Session = Depends(get_db)):
     """子女用户注册"""
-    try:
-        user, token = AuthService.register_user(db, request)
-        return TokenResponse(
-            access_token=token,
-            token_type="bearer",
-            user_type="user",
-            user_id=user.id
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    user, token = AuthService.register_user(db, request)
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        user_type="user",
+        user_id=user.id
+    )
 
 
 @router.post(
@@ -44,16 +41,13 @@ def register_user(request: RegisterUserRequest, db: Session = Depends(get_db)):
 )
 def register_elder(request: RegisterElderRequest, db: Session = Depends(get_db)):
     """老人用户注册"""
-    try:
-        elder, token = AuthService.register_elder(db, request)
-        return TokenResponse(
-            access_token=token,
-            token_type="bearer",
-            user_type="elder",
-            user_id=elder.id
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    elder, token = AuthService.register_elder(db, request)
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        user_type="elder",
+        user_id=elder.id
+    )
 
 
 @router.post(
@@ -64,16 +58,13 @@ def register_elder(request: RegisterElderRequest, db: Session = Depends(get_db))
 )
 def login_user(request: LoginRequest, db: Session = Depends(get_db)):
     """子女用户登录"""
-    try:
-        user, token = AuthService.login_user(db, request.phone, request.password)
-        return TokenResponse(
-            access_token=token,
-            token_type="bearer",
-            user_type="user",
-            user_id=user.id
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+    user, token = AuthService.login_user(db, request.phone, request.password)
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        user_type="user",
+        user_id=user.id
+    )
 
 
 @router.post(
@@ -84,16 +75,13 @@ def login_user(request: LoginRequest, db: Session = Depends(get_db)):
 )
 def login_elder(request: LoginRequest, db: Session = Depends(get_db)):
     """老人用户登录"""
-    try:
-        elder, token = AuthService.login_elder(db, request.phone, request.password)
-        return TokenResponse(
-            access_token=token,
-            token_type="bearer",
-            user_type="elder",
-            user_id=elder.id
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+    elder, token = AuthService.login_elder(db, request.phone, request.password)
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        user_type="elder",
+        user_id=elder.id
+    )
 
 
 @router.get(

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.error_codes import BusinessException, ErrorCode
 from app.modules.auth.dependencies import get_current_user
 from app.modules.task.dto.TaskDto import (
     TaskCompleteDto,
@@ -39,9 +40,9 @@ def create_task(
     - 404: 档案或行程不存在
     """
     if not ProfileService.get_profile_by_id(db, payload.profile_id):
-        raise HTTPException(status_code=404, detail="档案不存在")
+        raise BusinessException(ErrorCode.PROFILE_NOT_FOUND)
     if not TripService.get_trip_by_id(db, payload.trip_id):
-        raise HTTPException(status_code=404, detail="行程不存在")
+        raise BusinessException(ErrorCode.TRIP_NOT_FOUND)
 
     task = TaskService.create_task(db, payload.profile_id, payload.trip_id, payload.title, payload.description)
     return task
@@ -72,7 +73,7 @@ def complete_task(
     """
     task = TaskService.complete_task(db, task_id, payload.completed_note, payload.photo_url)
     if not task:
-        raise HTTPException(status_code=404, detail="任务不存在")
+        raise BusinessException(ErrorCode.TASK_NOT_FOUND)
     return task
 
 
@@ -101,7 +102,7 @@ def feedback_task(
     """
     task = TaskService.feedback_task(db, task_id, payload.feedback_text, payload.hearts_delta)
     if not task:
-        raise HTTPException(status_code=404, detail="任务不存在")
+        raise BusinessException(ErrorCode.TASK_NOT_FOUND)
     return task
 
 
@@ -149,7 +150,7 @@ def get_task(
     """
     task = TaskService.get_task_by_id(db, task_id)
     if not task:
-        raise HTTPException(status_code=404, detail="任务不存在")
+        raise BusinessException(ErrorCode.TASK_NOT_FOUND)
     return task
 
 
@@ -194,7 +195,7 @@ def delete_task(
     """
     task = TaskService.get_task_by_id(db, task_id)
     if not task:
-        raise HTTPException(status_code=404, detail="任务不存在")
+        raise BusinessException(ErrorCode.TASK_NOT_FOUND)
     
     TaskService.delete_task(db, task_id)
     return {"message": "任务删除成功"}

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.error_codes import BusinessException, ErrorCode
 from app.modules.auth.dependencies import get_current_user
 from app.modules.trip.dto.TripDto import TripCreateDto, TripResponseDto
 from app.modules.trip.service.TripService import TripService
@@ -24,7 +25,7 @@ def create_trip(
 ):
     """创建行程"""
     if not ProfileService.get_profile_by_id(db, payload.profile_id):
-        raise HTTPException(status_code=404, detail="档案不存在")
+        raise BusinessException(ErrorCode.PROFILE_NOT_FOUND)
 
     trip = TripService.create_trip(db, payload.profile_id, payload.destination, payload.travel_date)
     return trip
@@ -45,7 +46,7 @@ def get_trip(
     """获取行程详情"""
     trip = TripService.get_trip_by_id(db, trip_id)
     if not trip:
-        raise HTTPException(status_code=404, detail="行程不存在")
+        raise BusinessException(ErrorCode.TRIP_NOT_FOUND)
     return trip
 
 
@@ -64,7 +65,7 @@ def get_trip_pass(
     """获取通行码"""
     trip = TripService.get_trip_by_id(db, trip_id)
     if not trip:
-        raise HTTPException(status_code=404, detail="行程不存在")
+        raise BusinessException(ErrorCode.TRIP_NOT_FOUND)
     return trip
 
 
@@ -117,7 +118,7 @@ def delete_trip(
     """删除行程"""
     trip = TripService.get_trip_by_id(db, trip_id)
     if not trip:
-        raise HTTPException(status_code=404, detail="行程不存在")
+        raise BusinessException(ErrorCode.TRIP_NOT_FOUND)
     
     TripService.delete_trip(db, trip_id)
     return {"message": "行程删除成功"}

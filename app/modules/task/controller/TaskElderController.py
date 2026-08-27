@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.error_codes import BusinessException, ErrorCode
 from app.modules.auth.dependencies import get_current_elder
 from app.modules.task.dto.TaskDto import TaskResponseDto
 from app.modules.task.service.TaskService import TaskService
@@ -23,7 +24,7 @@ def get_task(
     """获取任务详情"""
     task = TaskService.get_task_by_id(db, task_id)
     if not task:
-        raise HTTPException(status_code=404, detail="任务不存在")
+        raise BusinessException(ErrorCode.TASK_NOT_FOUND)
     return task
 
 

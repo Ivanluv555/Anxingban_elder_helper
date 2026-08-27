@@ -2,9 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.error_codes import BusinessException, ErrorCode
 from app.modules.auth.dependencies import get_current_elder
 from app.modules.card.dto.CardDto import CardGenerateDto, CardResponseDto
 from app.modules.card.service.CardService import CardService
+from app.modules.trip.entity.TripEntity import TripEntity
 
 router = APIRouter(prefix="/api/elder/cards", tags=["老人-回忆卡片"])
 
@@ -21,9 +23,17 @@ def generate_card(
     current_elder = Depends(get_current_elder)
 ):
     """生成回忆卡片"""
-    card = CardService.generate_card(db, payload.trip_id)
-    if not card:
-        raise HTTPException(status_code=404, detail="行程不存在或卡片生成失败")
+    trip = db.get(TripEntity, payload.trip_id)
+    if not trip:
+        raise BusinessException(ErrorCode.TRIP_NOT_FOUND)
+    
+    card = CardService.generate_card(
+        db=db,
+        trip_id=payload.trip_id,
+        title=payload.title,
+        image_url=payload.image_url,
+        trip_entity=trip
+    )
     return card
 
 
@@ -41,7 +51,7 @@ def get_card(
     """获取卡片详情"""
     card = CardService.get_card_by_id(db, card_id)
     if not card:
-        raise HTTPException(status_code=404, detail="卡片不存在")
+        raise BusinessException(ErrorCode.CARD_NOT_FOUND)
     return card
 
 
@@ -80,7 +90,7 @@ def delete_card(
     """删除卡片"""
     card = CardService.get_card_by_id(db, card_id)
     if not card:
-        raise HTTPException(status_code=404, detail="卡片不存在")
+        raise BusinessException(ErrorCode.CARD_NOT_FOUND)
     
     CardService.delete_card(db, card_id)
     return {"message": "卡片删除成功"}
