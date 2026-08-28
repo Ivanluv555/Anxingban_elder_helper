@@ -99,8 +99,11 @@ def get_current_user_info(current_user = Depends(get_current_user)):
     "/elder/me",
     response_model=ElderInfoResponse,
     summary="获取当前老人用户信息",
-    description="获取当前登录老人用户的详细信息"
+    description="获取当前登录老人用户的详细信息，包含二维码供子女扫描"
 )
-def get_current_elder_info(current_elder = Depends(get_current_elder)):
-    """获取当前老人用户信息"""
-    return current_elder
+def get_current_elder_info(
+    current_elder = Depends(get_current_elder),
+    db: Session = Depends(get_db)
+):
+    """获取当前老人用户信息，生成二维码"""
+    return AuthService.get_elder_info_with_qr(db, current_elder)

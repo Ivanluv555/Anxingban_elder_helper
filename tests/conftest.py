@@ -1,33 +1,34 @@
 """
-单元测试配置文件
+测试配置文件 - 提供测试数据库、fixtures 和工具函数
 """
 import os
 import pytest
+from typing import Generator
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
-# 设置测试环境
-os.environ["ENVIRONMENT"] = "test"
-os.environ["LOG_LEVEL"] = "ERROR"  # 测试时只记录错误
-
-# 测试数据库配置
+# 设置测试数据库 - 使用内存数据库避免数据污染
 TEST_DATABASE_URL = os.getenv(
-    "TEST_DATABASE_URL",
-    "mysql+pymysql://root:password@localhost:3306/anxingban_test?charset=utf8mb4"
+    "TEST_DATABASE_URL", 
+    "sqlite:///:memory:"  # 使用内存数据库（每次测试独立）
 )
+os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 
-from app.database import Base, get_db, import_all_entities
 from app.main import app
+from app.utils.database import Base, get_db
 
-# 创建测试引擎
-test_engine = create_engine(TEST_DATABASE_URL, pool_pre_ping=True)
-TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+
+# 创建测试数据库引擎
+# SQLite 需要 check_same_thread=False
+connect_args = {"check_same_thread": False} if "sqlite" in TEST_DATABASE_URL else {}
+test_engine = create_engine(TEST_DATABASE_URL, connect_args=connect_args, pool_pre_ping=True)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
 
 def override_get_db():
     """覆盖数据库依赖"""
-    db = TestSessionLocal()
+    db = TestingSessionLocal()
     try:
         yield db
     finally:
@@ -37,9 +38,10 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def setup_test_database():
-    """创建测试数据库表"""
+    """Function 级别：每个测试前重建数据库表结构"""
+    from app.utils.database import import_all_entities
     import_all_entities()
     Base.metadata.create_all(bind=test_engine)
     yield
@@ -47,30 +49,126 @@ def setup_test_database():
 
 
 @pytest.fixture(scope="function")
-def client():
-    """创建测试客户端"""
+def db_session() -> Generator[Session, None, None]:
+    """Function 级别：提供独立的数据库会话"""
+    connection = test_engine.connect()
+    transaction = connection.begin()
+    session = TestingSessionLocal(bind=connection)
+    
+    yield session
+    
+    session.close()
+    transaction.rollback()
+    connection.close()
+
+
+@pytest.fixture(scope="function")
+def client() -> TestClient:
+    """Function 级别：提供测试客户端"""
     return TestClient(app)
 
 
 @pytest.fixture(scope="function")
-def db_session():
-    """创建数据库会话"""
-    session = TestSessionLocal()
-    try:
-        yield session
-    finally:
-        session.close()
+def clean_db(db_session):
+    """清空所有表数据"""
+    for table in reversed(Base.metadata.sorted_tables):
+        db_session.execute(table.delete())
+    db_session.commit()
+    yield db_session
 
 
-@pytest.fixture(scope="function", autouse=True)
-def reset_database():
-    """每个测试后清理数据"""
-    yield
-    session = TestSessionLocal()
-    try:
-        # 清空所有表
-        for table in reversed(Base.metadata.sorted_tables):
-            session.execute(table.delete())
-        session.commit()
-    finally:
-        session.close()
+# ============= 测试数据 Fixtures =============
+
+@pytest.fixture
+def test_user_data():
+    """测试用户数据"""
+    return {
+        "nickname": "TestUser",
+        "phone": "13800138000",
+        "password": "Test1234!@#"
+    }
+
+
+@pytest.fixture
+def test_elder_data():
+    """测试老人数据"""
+    return {
+        "name": "TestElder",
+        "phone": "13900139000",
+        "password": "Elder1234!@#",
+        "health_info": '{"chronic_diseases": "none"}',
+        "interests": "culture,food",
+        "wechat_webhook_url": ""
+    }
+
+
+@pytest.fixture
+def create_test_user(client, test_user_data):
+    """创建测试用户并返回 token"""
+    response = client.post("/api/auth/user/register", json=test_user_data)
+    assert response.status_code == 200
+    data = response.json()
+    return {
+        "user_id": data["user_id"],
+        "token": data["access_token"],
+        "headers": {"Authorization": f"Bearer {data['access_token']}"}
+    }
+
+
+@pytest.fixture
+def create_test_elder(client, test_elder_data):
+    """创建测试老人并返回 token"""
+    response = client.post("/api/auth/elder/register", json=test_elder_data)
+    assert response.status_code == 200
+    data = response.json()
+    return {
+        "elder_id": data["user_id"],
+        "token": data["access_token"],
+        "headers": {"Authorization": f"Bearer {data['access_token']}"}
+    }
+
+
+@pytest.fixture
+def create_test_profile(client, create_test_user, create_test_elder):
+    """创建测试档案"""
+    response = client.post(
+        "/api/user/profiles",
+        json={"elder_id": create_test_elder["elder_id"]},
+        headers=create_test_user["headers"]
+    )
+    assert response.status_code == 200
+    return response.json()
+
+
+@pytest.fixture
+def create_test_trip(client, create_test_user, create_test_profile):
+    """创建测试行程"""
+    from datetime import date, timedelta
+    response = client.post(
+        "/api/user/trips",
+        json={
+            "profile_id": create_test_profile["id"],
+            "destination": "重庆",
+            "travel_date": str(date.today() + timedelta(days=7))
+        },
+        headers=create_test_user["headers"]
+    )
+    assert response.status_code == 200
+    return response.json()
+
+
+@pytest.fixture
+def create_test_task(client, create_test_user, create_test_profile, create_test_trip):
+    """创建测试任务"""
+    response = client.post(
+        "/api/user/tasks",
+        json={
+            "profile_id": create_test_profile["id"],
+            "trip_id": create_test_trip["id"],
+            "title": "拍照打卡",
+            "description": "在解放碑拍照留念"
+        },
+        headers=create_test_user["headers"]
+    )
+    assert response.status_code == 200
+    return response.json()

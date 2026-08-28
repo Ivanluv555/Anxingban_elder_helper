@@ -1,42 +1,23 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class ProfileCreateDto(BaseModel):
-    parent_name: str = Field(min_length=1, max_length=80)
-    parent_phone: str = Field(min_length=5, max_length=30)
-    child_name: str = Field(min_length=1, max_length=80)
-    child_phone: str = Field(min_length=5, max_length=30)
-    chronic_diseases: str = ""
-    allergies: str = ""
-    mobility_limitations: str = ""
-    interests: str = "culture,food"
-    wechat_webhook_url: str = ""
+    """创建档案DTO - 扫码场景，只需要关联的用户ID"""
+    elder_id: int = Field(gt=0, description="老人用户ID")
 
 
 class ProfileUpdateDto(BaseModel):
-    parent_name: Optional[str] = Field(None, min_length=1, max_length=80)
-    parent_phone: Optional[str] = Field(None, min_length=5, max_length=30)
-    child_name: Optional[str] = Field(None, min_length=1, max_length=80)
-    child_phone: Optional[str] = Field(None, min_length=5, max_length=30)
-    chronic_diseases: Optional[str] = None
-    allergies: Optional[str] = None
-    mobility_limitations: Optional[str] = None
-    interests: Optional[str] = None
-    wechat_webhook_url: Optional[str] = None
+    """更新档案DTO - 目前无需更新"""
+    pass
 
 
 class ProfileResponseDto(BaseModel):
+    """档案响应DTO"""
     id: int
-    parent_name: str
-    parent_phone: str
-    child_name: str
-    child_phone: str
-    health_info: str
-    interests: str
-    wechat_webhook_url: str
+    elder_id: int
+    user_id: int
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

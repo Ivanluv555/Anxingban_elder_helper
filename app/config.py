@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     @field_validator("database_url")
     @classmethod
     def require_mysql(cls, value: str) -> str:
+        # 测试环境允许使用 SQLite
+        if value.startswith("sqlite"):
+            return value
+        
         if value.startswith("mysql://"):
             value = value.replace("mysql://", "mysql+pymysql://", 1)
         if not value.startswith("mysql+pymysql://"):

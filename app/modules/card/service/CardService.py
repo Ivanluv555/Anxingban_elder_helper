@@ -12,7 +12,7 @@ class CardService:
     @staticmethod
     def generate_card(db: Session, trip_id: int, title: str, image_url: str, trip_entity) -> MemoryCardEntity:
         tasks = db.scalars(select(TaskEntity).where(TaskEntity.trip_id == trip_id)).all()
-        completed_tasks = [t.title for t in tasks if t.status == "completed"]
+        completed_tasks = [t.title for t in tasks if (t.user_completed and t.elder_completed)]
         summary = f"Trip to {trip_entity.destination} on {trip_entity.travel_date}. Completed tasks: {', '.join(completed_tasks) if completed_tasks else 'none yet'}."
 
         card_data = {

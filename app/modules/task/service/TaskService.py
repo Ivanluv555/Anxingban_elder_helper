@@ -24,25 +24,27 @@ class TaskService:
         return repo.find_by_id(task_id)
 
     @staticmethod
-    def complete_task(db: Session, task_id: int, completed_note: str, photo_url: str) -> TaskEntity | None:
+    def complete_task_by_user(db: Session, task_id: int, feedback: str) -> TaskEntity | None:
+        """子女完成任务"""
         repo = TaskRepository(db)
         task = repo.find_by_id(task_id)
         if not task:
             return None
-        task.status = "completed"
-        task.completed_note = completed_note
-        task.photo_url = photo_url
-        task.completed_at = datetime.utcnow()
+        task.user_completed = True
+        task.user_feedback = feedback
+        task.user_completed_at = datetime.utcnow()
         return repo.update(task)
 
     @staticmethod
-    def feedback_task(db: Session, task_id: int, feedback_text: str, hearts_delta: int) -> TaskEntity | None:
+    def complete_task_by_elder(db: Session, task_id: int, feedback: str) -> TaskEntity | None:
+        """老人完成任务"""
         repo = TaskRepository(db)
         task = repo.find_by_id(task_id)
         if not task:
             return None
-        task.feedback_text = feedback_text
-        task.hearts = max(0, task.hearts + hearts_delta)
+        task.elder_completed = True
+        task.elder_feedback = feedback
+        task.elder_completed_at = datetime.utcnow()
         return repo.update(task)
 
     @staticmethod

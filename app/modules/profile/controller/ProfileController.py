@@ -1,14 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.utils.database import get_db
 from app.utils.error_codes import BusinessException, ErrorCode
 from app.modules.auth.dependencies import get_current_user
-from app.modules.profile.dto.ProfileDto import (
-    ProfileCreateDto,
-    ProfileResponseDto,
-    ProfileUpdateDto,
-)
+from app.modules.profile.dto.ProfileDto import ProfileCreateDto, ProfileResponseDto
 from app.modules.profile.service.ProfileService import ProfileService
 
 router = APIRouter(prefix="/api/user/profiles", tags=["子女-档案管理"])
@@ -18,157 +14,52 @@ router = APIRouter(prefix="/api/user/profiles", tags=["子女-档案管理"])
     "",
     response_model=list[ProfileResponseDto],
     summary="获取档案列表",
-    description="查询家庭档案列表，支持分页限制",
-    response_description="返回档案列表，按创建时间倒序排列"
+    description="查询当前用户的家庭档案列表"
 )
 def list_profiles(
     limit: int = 20,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """获取档案列表
-    
-    - **limit**: 返回数量限制，默认 20，最大 100
-    """
-    return ProfileService.list_profiles(db, limit)
+    """获取档案列表 - 只返回当前子女用户关联的档案"""
+    return ProfileService.list_profiles(db, current_user.id, limit)
 
 
 @router.post(
     "",
     response_model=ProfileResponseDto,
     summary="创建家庭档案",
-    description="创建新的家庭协同建档，记录长辈和子女信息、健康状况、兴趣偏好",
-    response_description="返回创建成功的档案信息，包含自动生成的档案 ID"
+    description="扫码场景：子女扫描老人二维码后创建关联档案"
 )
 def create_profile(
     payload: ProfileCreateDto,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """创建家庭档案
-    
-    记录内容：
-    - 长辈信息：姓名、联系方式
-    - 子女信息：姓名、联系方式
-    - 健康档案：慢性病、过敏史、行动能力
-    - 兴趣偏好：文化、美食等
-    - 通知渠道：企业微信 Webhook（可选）
-    """
+    """创建家庭档案 - 扫码后关联老人和子女"""
     profile = ProfileService.create_profile(
         db,
-        payload.parent_name,
-        payload.parent_phone,
-        payload.child_name,
-        payload.child_phone,
-        payload.chronic_diseases,
-        payload.allergies,
-        payload.mobility_limitations,
-        payload.interests,
-        payload.wechat_webhook_url,
+        elder_id=payload.elder_id,
+        user_id=current_user.id,
     )
     return profile
 
 
-@router.get(
-    "/{profile_id}",
-    response_model=ProfileResponseDto,
-    summary="获取单个档案详情",
-    description="根据档案 ID 查询档案完整信息",
-    response_description="返回档案详细信息"
-)
-def get_profile(
-    profile_id: int,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
-    """获取档案详情
-    
-    - **profile_id**: 档案 ID
-    
-    错误：
-    - 404: 档案不存在
-    """
-    profile = ProfileService.get_profile_by_id(db, profile_id)
-    if not profile:
-        raise BusinessException(ErrorCode.PROFILE_NOT_FOUND)
-    return profile
-
-
-@router.patch(
-    "/{profile_id}",
-    response_model=ProfileResponseDto,
-    summary="更新档案信息",
-    description="部分更新档案信息，仅更新提供的字段",
-    response_description="返回更新后的档案信息"
-)
-def update_profile(
-    profile_id: int,
-    payload: ProfileUpdateDto,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
-    """更新档案信息
-    
-    - **profile_id**: 档案 ID
-    - 支持部分更新，未提供的字段保持不变
-    - 可更新联系方式、健康信息、兴趣偏好
-    
-    错误：
-    - 404: 档案不存在
-    """
-    update_data = payload.model_dump(exclude_unset=True)
-    profile = ProfileService.update_profile(db, profile_id, **update_data)
-    if not profile:
-        raise BusinessException(ErrorCode.PROFILE_NOT_FOUND)
-    return profile
-
-
-@router.put(
-    "/{profile_id}",
-    response_model=ProfileResponseDto,
-    summary="更新档案信息（完整更新）",
-    description="完整更新档案信息，支持PUT方法",
-    response_description="返回更新后的档案信息"
-)
-def update_profile_put(
-    profile_id: int,
-    payload: ProfileUpdateDto,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
-    """更新档案信息（PUT方法）
-    
-    - **profile_id**: 档案 ID
-    - 兼容PUT方法，实际执行部分更新
-    - 可更新联系方式、健康信息、兴趣偏好
-    
-    错误：
-    - 404: 档案不存在
-    """
-    return update_profile(profile_id, payload, db)
-
-
 @router.delete(
     "/{profile_id}",
-    summary="删除档案",
-    description="删除指定的档案记录",
-    response_description="删除成功返回成功消息"
+    summary="删除档案"
 )
 def delete_profile(
     profile_id: int,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """删除档案
-    
-    - **profile_id**: 档案ID
-    
-    错误：
-    - 404: 档案不存在
-    """
+    """删除档案"""
     profile = ProfileService.get_profile_by_id(db, profile_id)
     if not profile:
-        raise BusinessException(ErrorCode.PROFILE_NOT_FOUND)
+        raise BusinessException(ErrorCode.NOT_FOUND, detail="档案不存在")
+    if profile.user_id != current_user.id:
+        raise BusinessException(ErrorCode.FORBIDDEN, detail="无权删除此档案")
     
     ProfileService.delete_profile(db, profile_id)
     return {"message": "档案删除成功"}

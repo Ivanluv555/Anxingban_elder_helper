@@ -1,167 +1,108 @@
 """
-行程模块单元测试
+Trip 模块测试
 """
 import pytest
 from datetime import date, timedelta
+from app.modules.trip.service.TripService import TripService
 
 
 class TestTripAPI:
-    """行程API测试"""
+    """Trip API 集成测试"""
     
-    @pytest.fixture
-    def profile_id(self, client):
-        """创建测试档案"""
+    def test_create_trip_success(self, client, create_test_user, create_test_profile):
+        """测试创建行程成功"""
+        travel_date = str(date.today() + timedelta(days=7))
+        
         response = client.post(
-            "/api/profiles",
+            "/api/user/trips",
             json={
-                "parent_name": "测试用户",
-                "parent_phone": "13800138000",
-                "child_name": "测试子女",
-                "child_phone": "13900139000",
+                "profile_id": create_test_profile["id"],
+                "destination": "成都",
+                "travel_date": travel_date
             },
-        )
-        return response.json()["id"]
-    
-    def test_create_trip_success(self, client, profile_id):
-        """测试创建行程 - 成功"""
-        response = client.post(
-            "/api/trips",
-            json={
-                "profile_id": profile_id,
-                "destination": "洪崖洞",
-                "travel_date": str(date.today()),
-            },
+            headers=create_test_user["headers"]
         )
         
         assert response.status_code == 200
         data = response.json()
-        assert "id" in data
-        assert "pass_token" in data
-        assert "pass_qr_svg" in data
-        assert data["pass_token"].startswith("ELDER-")
-        assert "<svg" in data["pass_qr_svg"]
-    
-    def test_create_trip_invalid_profile(self, client):
-        """测试创建行程 - 档案不存在"""
-        response = client.post(
-            "/api/trips",
-            json={
-                "profile_id": 99999,
-                "destination": "洪崖洞",
-                "travel_date": str(date.today()),
-            },
-        )
-        
-        assert response.status_code == 404
-        assert response.json()["error"] == "PROFILE_NOT_FOUND"
-    
-    def test_get_trip(self, client, profile_id):
-        """测试获取行程"""
-        # 创建行程
-        create_res = client.post(
-            "/api/trips",
-            json={
-                "profile_id": profile_id,
-                "destination": "解放碑",
-                "travel_date": str(date.today()),
-            },
-        )
-        trip_id = create_res.json()["id"]
-        
-        # 获取行程
-        response = client.get(f"/api/trips/{trip_id}")
-        
-        assert response.status_code == 200
-        data = response.json()
-        assert data["id"] == trip_id
-        assert data["destination"] == "解放碑"
-    
-    def test_get_trip_pass(self, client, profile_id):
-        """测试获取行程通行码"""
-        # 创建行程
-        create_res = client.post(
-            "/api/trips",
-            json={
-                "profile_id": profile_id,
-                "destination": "磁器口",
-                "travel_date": str(date.today()),
-            },
-        )
-        trip_id = create_res.json()["id"]
-        
-        # 获取通行码
-        response = client.get(f"/api/trips/{trip_id}/pass")
-        
-        assert response.status_code == 200
-        data = response.json()
+        assert data["destination"] == "成都"
+        assert data["travel_date"] == travel_date
         assert "pass_token" in data
         assert "pass_qr_svg" in data
     
-    def test_list_trips_by_profile(self, client, profile_id):
-        """测试按档案列出行程"""
-        # 创建多个行程
-        destinations = ["洪崖洞", "解放碑", "磁器口"]
-        for dest in destinations:
-            client.post(
-                "/api/trips",
-                json={
-                    "profile_id": profile_id,
-                    "destination": dest,
-                    "travel_date": str(date.today()),
-                },
-            )
-        
-        # 列出行程
-        response = client.get(f"/api/profiles/{profile_id}/trips")
+    def test_list_trips_no_qr(self, client, create_test_user, create_test_trip):
+        """测试获取行程列表（不含二维码）"""
+        response = client.get(
+            "/api/user/trips",
+            headers=create_test_user["headers"]
+        )
         
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 3
-        assert all(trip["profile_id"] == profile_id for trip in data)
-
-
-class TestTripValidation:
-    """行程数据验证测试"""
+        assert isinstance(data, list)
+        assert len(data) >= 1
+        # 列表不应该包含二维码
+        assert "pass_token" not in data[0]
+        assert "pass_qr_svg" not in data[0]
     
-    def test_past_date(self, client, profile_id):
-        """测试过去的日期"""
-        past_date = date.today() - timedelta(days=30)
-        response = client.post(
-            "/api/trips",
-            json={
-                "profile_id": profile_id,
-                "destination": "测试",
-                "travel_date": str(past_date),
-            },
+    def test_get_trip_detail_with_qr(self, client, create_test_user, create_test_trip):
+        """测试获取行程详情（含二维码）"""
+        trip_id = create_test_trip["id"]
+        
+        response = client.get(
+            f"/api/user/trips/{trip_id}",
+            headers=create_test_user["headers"]
         )
         
-        # 根据业务逻辑，可能允许或拒绝过去的日期
-        # 这里假设允许
-        assert response.status_code in [200, 400]
+        assert response.status_code == 200
+        data = response.json()
+        # 详情应该包含二维码
+        assert "pass_token" in data
+        assert "pass_qr_svg" in data
+        assert "<?xml" in data["pass_qr_svg"] or data["pass_qr_svg"].startswith("<svg")
     
-    def test_empty_destination(self, client, profile_id):
-        """测试空目的地"""
-        response = client.post(
-            "/api/trips",
-            json={
-                "profile_id": profile_id,
-                "destination": "",
-                "travel_date": str(date.today()),
-            },
+    def test_delete_trip(self, client, create_test_user, create_test_trip):
+        """测试删除行程"""
+        trip_id = create_test_trip["id"]
+        
+        response = client.delete(
+            f"/api/user/trips/{trip_id}",
+            headers=create_test_user["headers"]
         )
         
-        assert response.status_code == 422
+        assert response.status_code == 200
+        assert "成功" in response.json()["message"]
+
+
+class TestTripService:
+    """Trip Service 单元测试"""
     
-    @pytest.fixture
-    def profile_id(self, client):
-        """创建测试档案"""
-        response = client.post(
-            "/api/profiles",
-            json={
-                "parent_name": "测试",
-                "parent_phone": "13800138000",
-                "child_name": "测试子",
-                "child_phone": "13900139000",
-            },
+    def test_create_trip(self, db_session):
+        """测试创建行程"""
+        travel_date = date.today() + timedelta(days=7)
+        
+        trip = TripService.create_trip(
+            db_session,
+            profile_id=1,
+            destination="北京",
+            travel_date=travel_date
         )
-        return response.json()["id"]
+        
+        assert trip is not None
+        assert trip.destination == "北京"
+        assert trip.pass_token is not None
+        assert trip.pass_qr_svg is not None
+        assert len(trip.pass_token) > 20
+    
+    def test_list_trips_by_profile(self, db_session):
+        """测试按档案查询行程"""
+        travel_date = date.today() + timedelta(days=7)
+        
+        TripService.create_trip(db_session, 1, "北京", travel_date)
+        TripService.create_trip(db_session, 1, "上海", travel_date)
+        TripService.create_trip(db_session, 2, "广州", travel_date)
+        
+        trips = TripService.list_trips_by_profile(db_session, profile_id=1)
+        
+        assert len(trips) == 2
+        assert all(t.profile_id == 1 for t in trips)

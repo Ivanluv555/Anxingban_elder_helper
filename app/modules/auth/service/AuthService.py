@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Optional
+import json
 
+import segno
 from sqlalchemy.orm import Session
 
 from app.utils.error_codes import BusinessException, ErrorCode
@@ -99,4 +101,22 @@ class AuthService:
         """根据ID获取老人用户"""
         repo = ElderRepository(db)
         return repo.find_by_id(elder_id)
-        return db.get(ElderEntity, elder_id)
+    
+    @staticmethod
+    def get_elder_info_with_qr(db: Session, elder: ElderEntity) -> dict:
+        """获取老人信息并生成二维码"""
+        qr_data = json.dumps({"elder_id": elder.id, "type": "elder_qr"})
+        qr_code = segno.make(qr_data)
+        qr_svg = qr_code.svg_inline(scale=5)
+        
+        return {
+            "id": elder.id,
+            "name": elder.name,
+            "phone": elder.phone,
+            "health_info": elder.health_info,
+            "interests": elder.interests,
+            "wechat_webhook_url": elder.wechat_webhook_url,
+            "qr_code_svg": qr_svg,
+            "last_login_at": elder.last_login_at,
+            "created_at": elder.created_at,
+        }

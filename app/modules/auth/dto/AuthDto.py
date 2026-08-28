@@ -46,5 +46,6 @@ class ElderInfoResponse(BaseModel):
     health_info: str
     interests: str
     wechat_webhook_url: str
+    qr_code_svg: str = Field(..., description="老人二维码SVG（供子女扫描）")
     last_login_at: Optional[datetime]
     created_at: datetime

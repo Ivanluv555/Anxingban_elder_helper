@@ -12,13 +12,7 @@ class TaskCreateDto(BaseModel):
 
 
 class TaskCompleteDto(BaseModel):
-    completed_note: str = Field(default="", max_length=500)
-    photo_url: str = Field(default="", max_length=400)
-
-
-class TaskFeedbackDto(BaseModel):
-    feedback_text: str = Field(default="", max_length=500)
-    hearts_delta: int = Field(default=1, ge=-10, le=10)
+    feedback: str = Field(default="", max_length=500, description="完成反馈")
 
 
 class TaskResponseDto(BaseModel):
@@ -27,12 +21,26 @@ class TaskResponseDto(BaseModel):
     trip_id: int
     title: str
     description: str
-    status: str
-    completed_note: Optional[str] = None
-    photo_url: Optional[str] = None
-    feedback_text: Optional[str] = None
-    hearts: int
+    user_completed: bool
+    elder_completed: bool
     created_at: datetime
-    completed_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TaskDetailDto(BaseModel):
+    """任务详情DTO - 包含反馈和完成时间"""
+    id: int
+    profile_id: int
+    trip_id: int
+    title: str
+    description: str
+    user_completed: bool
+    user_feedback: Optional[str]
+    elder_completed: bool
+    elder_feedback: Optional[str]
+    created_at: datetime
+    user_completed_at: Optional[datetime]
+    elder_completed_at: Optional[datetime]
 
     model_config = ConfigDict(from_attributes=True)
