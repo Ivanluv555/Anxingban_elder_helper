@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.error_codes import BusinessException, ErrorCode
+from app.utils.database import get_db
+from app.utils.error_codes import BusinessException, ErrorCode
 from app.modules.auth.dependencies import get_current_user
 from app.modules.trip.dto.TripDto import TripCreateDto, TripResponseDto
 from app.modules.trip.service.TripService import TripService

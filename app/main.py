@@ -7,9 +7,9 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from app.config import settings
-from app.database import Base, engine, import_all_entities, SessionLocal
-from app.logger import get_logger, setup_logging
-from app.error_codes import BusinessException, ErrorCode, get_error_response
+from app.utils.database import Base, engine, import_all_entities, SessionLocal
+from app.utils.logger import get_logger, setup_logging
+from app.utils.error_codes import BusinessException, ErrorCode, get_error_response
 
 # 认证模块
 from app.modules.auth.controller.AuthController import router as auth_router

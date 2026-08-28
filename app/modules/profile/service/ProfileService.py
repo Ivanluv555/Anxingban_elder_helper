@@ -1,20 +1,21 @@
 import json
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.modules.profile.entity.ProfileEntity import ProfileEntity
+from app.modules.profile.repository.ProfileRepository import ProfileRepository
 
 
 class ProfileService:
     @staticmethod
     def list_profiles(db: Session, limit: int = 20) -> list[ProfileEntity]:
-        safe_limit = max(1, min(limit, 100))
-        return list(db.scalars(select(ProfileEntity).order_by(ProfileEntity.id.desc()).limit(safe_limit)).all())
+        repo = ProfileRepository(db)
+        return repo.find_all(limit)
 
     @staticmethod
     def get_profile_by_id(db: Session, profile_id: int) -> ProfileEntity | None:
-        return db.get(ProfileEntity, profile_id)
+        repo = ProfileRepository(db)
+        return repo.find_by_id(profile_id)
 
     @staticmethod
     def create_profile(
@@ -29,6 +30,7 @@ class ProfileService:
         interests: str,
         wechat_webhook_url: str,
     ) -> ProfileEntity:
+        repo = ProfileRepository(db)
         health_info = {
             "chronic_diseases": chronic_diseases,
             "allergies": allergies,
@@ -43,14 +45,12 @@ class ProfileService:
             interests=interests,
             wechat_webhook_url=wechat_webhook_url,
         )
-        db.add(profile)
-        db.commit()
-        db.refresh(profile)
-        return profile
+        return repo.create(profile)
 
     @staticmethod
     def update_profile(db: Session, profile_id: int, **kwargs) -> ProfileEntity | None:
-        profile = db.get(ProfileEntity, profile_id)
+        repo = ProfileRepository(db)
+        profile = repo.find_by_id(profile_id)
         if not profile:
             return None
 
@@ -68,13 +68,11 @@ class ProfileService:
             if value is not None and hasattr(profile, key):
                 setattr(profile, key, value)
 
-        db.commit()
-        db.refresh(profile)
-        return profile
+        return repo.update(profile)
 
     @staticmethod
     def delete_profile(db: Session, profile_id: int) -> None:
-        profile = db.get(ProfileEntity, profile_id)
+        repo = ProfileRepository(db)
+        profile = repo.find_by_id(profile_id)
         if profile:
-            db.delete(profile)
-            db.commit()
+            repo.delete(profile)

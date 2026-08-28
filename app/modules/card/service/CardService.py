@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.modules.card.entity.MemoryCardEntity import MemoryCardEntity
+from app.modules.card.repository.CardRepository import CardRepository
 from app.modules.task.entity.TaskEntity import TaskEntity
 
 
@@ -20,6 +21,7 @@ class CardService:
             "travel_date": str(trip_entity.travel_date),
             "completed_tasks": completed_tasks,
         }
+        repo = CardRepository(db)
         card = MemoryCardEntity(
             trip_id=trip_id,
             title=title,
@@ -27,33 +29,31 @@ class CardService:
             image_url=image_url,
             card_json=json.dumps(card_data, ensure_ascii=True),
         )
-        db.add(card)
-        db.commit()
-        db.refresh(card)
-        return card
+        return repo.create(card)
 
     @staticmethod
     def get_card_by_id(db: Session, card_id: int) -> MemoryCardEntity | None:
-        return db.get(MemoryCardEntity, card_id)
+        repo = CardRepository(db)
+        return repo.find_by_id(card_id)
 
     @staticmethod
     def list_cards_by_trip(db: Session, trip_id: int) -> list[MemoryCardEntity]:
-        return list(db.scalars(select(MemoryCardEntity).where(MemoryCardEntity.trip_id == trip_id).order_by(MemoryCardEntity.id.desc())).all())
+        repo = CardRepository(db)
+        return repo.find_by_trip(trip_id)
 
     @staticmethod
     def list_cards_by_profile(db: Session, profile_id: int) -> list[MemoryCardEntity]:
-        # 通过trip_id关联查询
-        from app.modules.trip.entity.TripEntity import TripEntity
-        stmt = select(MemoryCardEntity).join(TripEntity).where(TripEntity.profile_id == profile_id).order_by(MemoryCardEntity.id.desc())
-        return list(db.scalars(stmt).all())
+        repo = CardRepository(db)
+        return repo.find_by_profile(profile_id)
 
     @staticmethod
     def list_all_cards(db: Session, limit: int = 100) -> list[MemoryCardEntity]:
-        return list(db.scalars(select(MemoryCardEntity).order_by(MemoryCardEntity.id.desc()).limit(limit)).all())
+        repo = CardRepository(db)
+        return repo.find_all(limit)
 
     @staticmethod
     def delete_card(db: Session, card_id: int) -> None:
-        card = db.get(MemoryCardEntity, card_id)
+        repo = CardRepository(db)
+        card = repo.find_by_id(card_id)
         if card:
-            db.delete(card)
-            db.commit()
+            repo.delete(card)

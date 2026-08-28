@@ -1,17 +1,23 @@
 import re
-from passlib.context import CryptContext
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Argon2 是现代推荐的密码哈希算法，无长度限制，更安全
+ph = PasswordHasher()
 
 
 def hash_password(password: str) -> str:
     """生成密码哈希值"""
-    return pwd_context.hash(password)
+    return ph.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """验证密码"""
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        ph.verify(hashed_password, plain_password)
+        return True
+    except VerifyMismatchError:
+        return False
 
 
 def validate_password_complexity(password: str) -> tuple[bool, str]:

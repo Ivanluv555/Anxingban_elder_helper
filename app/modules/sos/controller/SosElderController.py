@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.error_codes import BusinessException, ErrorCode
+from app.utils.database import get_db
+from app.utils.error_codes import BusinessException, ErrorCode
 from app.modules.auth.dependencies import get_current_elder
 from app.modules.sos.dto.SosDto import SosResponseDto, SosRequestDto
 from app.modules.sos.service.SosService import SosService

@@ -1,8 +1,8 @@
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.modules.sos.entity.SosRecordEntity import SosRecordEntity
+from app.modules.sos.repository.SosRepository import SosRepository
 from app.services.notification import send_dual_channel
 
 
@@ -29,6 +29,7 @@ class SosService:
             sms_provider=settings.sms_provider,
         )
 
+        repo = SosRepository(db)
         sos_record = SosRecordEntity(
             profile_id=profile_id,
             trip_id=trip_id,
@@ -39,15 +40,14 @@ class SosService:
             sms_status=result.sms_status,
             wechat_status=result.wechat_status,
         )
-        db.add(sos_record)
-        db.commit()
-        db.refresh(sos_record)
-        return sos_record
+        return repo.create(sos_record)
 
     @staticmethod
     def list_sos_by_profile(db: Session, profile_id: int) -> list[SosRecordEntity]:
-        return list(db.scalars(select(SosRecordEntity).where(SosRecordEntity.profile_id == profile_id).order_by(SosRecordEntity.id.desc())).all())
+        repo = SosRepository(db)
+        return repo.find_by_profile(profile_id)
 
     @staticmethod
     def list_all_sos(db: Session, limit: int = 100) -> list[SosRecordEntity]:
-        return list(db.scalars(select(SosRecordEntity).order_by(SosRecordEntity.id.desc()).limit(limit)).all())
+        repo = SosRepository(db)
+        return repo.find_all(limit)
