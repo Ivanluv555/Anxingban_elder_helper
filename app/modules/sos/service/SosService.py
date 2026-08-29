@@ -15,16 +15,18 @@ class SosService:
         latitude: float | None,
         longitude: float | None,
         network_status: str,
-        profile_entity,
+        child_phone: str | None,
+        wechat_webhook_url: str | None,
+        health_info: str | None = None,
     ) -> SosRecordEntity:
         message = (
-            f"Emergency alert for {profile_entity.parent_name} in {settings.pilot_city}. "
+            f"Emergency alert for profile {profile_id} in {settings.pilot_city}. "
             f"Location=({latitude},{longitude}), network={network_status}."
         )
 
         result = await send_dual_channel(
-            child_phone=profile_entity.child_phone,
-            wechat_webhook_url=profile_entity.wechat_webhook_url or settings.wechat_webhook_url,
+            child_phone=child_phone or "",
+            wechat_webhook_url=wechat_webhook_url or settings.wechat_webhook_url,
             message=message,
             sms_provider=settings.sms_provider,
         )
@@ -36,7 +38,7 @@ class SosService:
             latitude=latitude,
             longitude=longitude,
             network_status=network_status,
-            health_snapshot=profile_entity.health_info,
+            health_snapshot=health_info or "{}",
             sms_status=result.sms_status,
             wechat_status=result.wechat_status,
         )

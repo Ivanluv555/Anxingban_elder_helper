@@ -22,14 +22,15 @@ async def trigger_sos(
     current_elder = Depends(get_current_elder)
 ):
     """触发SOS"""
-    # 这里需要从profile获取elder信息，暂时简化处理
     from app.modules.profile.service.ProfileService import ProfileService
+    from app.modules.auth.service.AuthService import AuthService
+    
     profile = ProfileService.get_profile_by_id(db, payload.profile_id)
     if not profile:
         raise BusinessException(ErrorCode.PROFILE_NOT_BOUND)
     
-    # 获取elder信息作为profile_entity传递
-    from app.modules.auth.service.AuthService import AuthService
+    # 获取关联的 User 和 Elder 信息
+    user = AuthService.get_user_by_id(db, profile.user_id)
     elder = AuthService.get_elder_by_id(db, profile.elder_id)
     
     sos_record = await SosService.trigger_sos(
@@ -39,7 +40,9 @@ async def trigger_sos(
         payload.latitude,
         payload.longitude,
         payload.network_status,
-        elder
+        user.phone if user else None,
+        elder.wechat_webhook_url if elder else None,
+        elder.health_info if elder else None
     )
     return sos_record
 
