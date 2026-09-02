@@ -5,29 +5,43 @@ import os
 import pytest
 from typing import Generator
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.pool import StaticPool 
 
-# 设置测试数据库 - 使用内存数据库避免数据污染
+# 设置测试数据库
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL", 
-    "sqlite:///:memory:"  # 使用内存数据库（每次测试独立）
+    "sqlite:///:memory:"
 )
-os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 
-from app.main import app
-from app.utils.database import Base, get_db
-
-
-# 创建测试数据库引擎
-# SQLite 需要 check_same_thread=False
+# 创建测试专用的数据库引擎
+# 对于内存数据库，使用 StaticPool 确保所有连接使用同一个数据库实例
 connect_args = {"check_same_thread": False} if "sqlite" in TEST_DATABASE_URL else {}
-test_engine = create_engine(TEST_DATABASE_URL, connect_args=connect_args, pool_pre_ping=True)
+poolclass = StaticPool if TEST_DATABASE_URL == "sqlite:///:memory:" else None
+
+test_engine = create_engine(
+    TEST_DATABASE_URL, 
+    connect_args=connect_args, 
+    poolclass=poolclass,
+    pool_pre_ping=True
+)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+
+# 导入 Base 和实体
+from app.utils.database import Base
+from app.utils.database import import_all_entities
+
+# 立即导入所有实体
+import_all_entities()
+
+# 导入 app（这会使用 .env 中的配置，但我们会覆盖 get_db）
+from app.main import app
+from app.utils.database import get_db
 
 
 def override_get_db():
-    """覆盖数据库依赖"""
+    """覆盖数据库依赖 - 使用测试数据库"""
     db = TestingSessionLocal()
     try:
         yield db
@@ -35,14 +49,13 @@ def override_get_db():
         db.close()
 
 
+# 覆盖 FastAPI 的数据库依赖
 app.dependency_overrides[get_db] = override_get_db
 
 
 @pytest.fixture(scope="function", autouse=True)
 def setup_test_database():
     """Function 级别：每个测试前重建数据库表结构"""
-    from app.utils.database import import_all_entities
-    import_all_entities()
     Base.metadata.create_all(bind=test_engine)
     yield
     Base.metadata.drop_all(bind=test_engine)
