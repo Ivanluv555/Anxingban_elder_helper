@@ -114,6 +114,7 @@ lerna-debug.log*
 .svn/
 .swiftpm/
 migrate_working_dir/
+.metadata
 
 # IntelliJ related
 *.iml
@@ -130,6 +131,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 coverage/
+pubspec.lock
 
 # Symbolication related
 app.*.symbols
