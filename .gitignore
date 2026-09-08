@@ -1,10 +1,13 @@
 # ============================================
-# Python Backend
+# Python Backend (axb_back)
 # ============================================
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -14,11 +17,13 @@ eggs/
 .eggs/
 lib/
 lib64/
-!mobile/**/lib/
+!axb_mobile/**/lib/
 parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -28,19 +33,25 @@ MANIFEST
 venv/
 ENV/
 env/
-.venv
+.venv/
 
-# Test coverage
+# Unit test / coverage reports
 htmlcov/
 .tox/
+.nox/
 .coverage
 .coverage.*
 .cache
 nosetests.xml
 coverage.xml
 *.cover
+*.py,cover
 .hypothesis/
 .pytest_cache/
+
+# Mutation Testing
+.mutmut-cache
+*.mutmut-cache
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -48,118 +59,143 @@ coverage.xml
 # pyenv
 .python-version
 
+# Environments
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.test
+
 # mypy
 .mypy_cache/
 .dmypy.json
 dmypy.json
 
-# ============================================
-# Frontend (Node.js/Vue/React)
-# ============================================
-frontend/node_modules/
-frontend/dist/
-frontend/*.log
+# Pyre type checker
+.pyre/
 
 # ============================================
-# Flutter Mobile
+# Frontend (axb_front - React/Vite/Node.js)
+# ============================================
+# Dependencies
+node_modules/
+jspm_packages/
+
+# Testing
+coverage/
+
+# Production
+dist/
+build/
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# Vite
+.vite/
+
+# Parcel cache
+.parcel-cache
+
+# ============================================
+# Flutter Mobile (axb_mobile)
 # ============================================
 # Miscellaneous
-mobile/anxingban/*.class
-mobile/anxingban/*.log
-mobile/anxingban/*.pyc
-mobile/anxingban/*.swp
-mobile/anxingban/.atom/
-mobile/anxingban/.build/
-mobile/anxingban/.buildlog/
-mobile/anxingban/.history
-mobile/anxingban/.svn/
-mobile/anxingban/.swiftpm/
-mobile/anxingban/migrate_working_dir/
+*.class
+*.pyc
+*.swp
+.atom/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
 
 # IntelliJ related
-mobile/anxingban/*.iml
-mobile/anxingban/*.ipr
-mobile/anxingban/*.iws
-mobile/anxingban/.idea/
+*.iml
+*.ipr
+*.iws
 
 # Flutter/Dart/Pub related
-mobile/anxingban/**/doc/api/
-mobile/anxingban/**/ios/Flutter/.last_build_id
-mobile/anxingban/.dart_tool/
-mobile/anxingban/.flutter-plugins-dependencies
-mobile/anxingban/.pub-cache/
-mobile/anxingban/.pub/
-mobile/anxingban/build/
-mobile/anxingban/coverage/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+coverage/
 
 # Symbolication related
-mobile/anxingban/app.*.symbols
+app.*.symbols
 
 # Obfuscation related
-mobile/anxingban/app.*.map.json
+app.*.map.json
 
 # Android Studio build artifacts
-mobile/anxingban/android/app/debug/
-mobile/anxingban/android/app/profile/
-mobile/anxingban/android/app/release/
-mobile/anxingban/android/gradle-wrapper.jar
-mobile/anxingban/android/.gradle/
-mobile/anxingban/android/captures/
-mobile/anxingban/android/gradlew
-mobile/anxingban/android/gradlew.bat
-mobile/anxingban/android/local.properties
-mobile/anxingban/android/GeneratedPluginRegistrant.java
-mobile/anxingban/android/.cxx/
-mobile/anxingban/android/key.properties
-mobile/anxingban/android/**/*.keystore
-mobile/anxingban/android/**/*.jks
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
 
-# iOS specific
-mobile/anxingban/ios/**/dgph
-mobile/anxingban/ios/*.mode1v3
-mobile/anxingban/ios/*.mode2v3
-mobile/anxingban/ios/*.moved-aside
-mobile/anxingban/ios/*.pbxuser
-mobile/anxingban/ios/*.perspectivev3
-mobile/anxingban/ios/**/*sync/
-mobile/anxingban/ios/.sconsign.dblite
-mobile/anxingban/ios/.tags*
-mobile/anxingban/ios/**/.vagrant/
-mobile/anxingban/ios/**/DerivedData/
-mobile/anxingban/ios/Icon?
-mobile/anxingban/ios/**/Pods/
-mobile/anxingban/ios/**/.symlinks/
-mobile/anxingban/ios/profile
-mobile/anxingban/ios/xcuserdata
-mobile/anxingban/ios/**/.generated/
-mobile/anxingban/ios/Flutter/App.framework
-mobile/anxingban/ios/Flutter/Flutter.framework
-mobile/anxingban/ios/Flutter/Flutter.podspec
-mobile/anxingban/ios/Flutter/Generated.xcconfig
-mobile/anxingban/ios/Flutter/ephemeral/
-mobile/anxingban/ios/Flutter/app.flx
-mobile/anxingban/ios/Flutter/app.zip
-mobile/anxingban/ios/Flutter/flutter_assets/
-mobile/anxingban/ios/Flutter/flutter_export_environment.sh
-mobile/anxingban/ios/ServiceDefinitions.json
-mobile/anxingban/ios/Runner/GeneratedPluginRegistrant.*
+# Android related
+**/android/**/gradle-wrapper.jar
+**/android/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/.cxx/
+**/android/key.properties
+**/android/**/*.keystore
+**/android/**/*.jks
+**/android/**/*.iml
 
-# iOS Exceptions
-!mobile/anxingban/ios/default.mode1v3
-!mobile/anxingban/ios/default.mode2v3
-!mobile/anxingban/ios/default.pbxuser
-!mobile/anxingban/ios/default.perspectivev3
+# iOS/XCode related
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# Exceptions to above rules
+!**/ios/**/default.mode1v3
+!**/ios/**/default.mode2v3
+!**/ios/**/default.pbxuser
+!**/ios/**/default.perspectivev3
+
+# Web related
+**/web/flutter_service_worker.js
 
 # Widget Preview
-mobile/anxingban/.widget_preview/
-
-# ============================================
-# Environment Variables
-# ============================================
-.env
-.env.local
-.env.*.local
-.env.docker
+.widget_preview/
 
 # ============================================
 # Database
@@ -167,9 +203,10 @@ mobile/anxingban/.widget_preview/
 *.db
 *.sqlite
 *.sqlite3
+*.db-journal
 
 # ============================================
-# IDE
+# IDE & Editors
 # ============================================
 .vscode/
 .idea/
@@ -179,11 +216,18 @@ mobile/anxingban/.widget_preview/
 .project
 .pydevproject
 .settings/
+*.sublime-project
+*.sublime-workspace
 
 # ============================================
 # OS
 # ============================================
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 Desktop.ini
 
@@ -201,19 +245,32 @@ pip-delete-this-directory.txt
 *.bak
 *.backup
 *~
+*.orig
+*.rej
 
 # ============================================
 # Docker
 # ============================================
 *.tar
 *.tar.gz
+docker-compose.override.yml
+
+# ============================================
+# AI Tools & Documentation
+# ============================================
+CLAUDE.md
+.claude/
+
+# ============================================
+# Temporary & Generated Files
+# ============================================
+tmp/
+temp/
+*.tmp
+.cache/
+*.cache
 
 # ============================================
 # Legacy/Deprecated
 # ============================================
 static_legacy/
-
-# ============================================
-# AI Tools
-# ============================================
-CLAUDE.md
