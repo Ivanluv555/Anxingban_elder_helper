@@ -121,17 +121,6 @@ app.include_router(card_elder_router)
 app.include_router(guide_router)
 
 
-@app.get("/", tags=["健康检查"])
-async def root():
-    """根路径 - 健康检查"""
-    return {
-        "status": "ok",
-        "app": settings.app_name,
-        "environment": settings.environment,
-        "message": "安行伴后端服务运行中"
-    }
-
-
 @app.get("/health", tags=["健康检查"])
 async def health_check():
     """健康检查端点"""

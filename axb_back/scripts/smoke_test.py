@@ -11,8 +11,8 @@ def test_health_check(base_url: str = "http://127.0.0.1:8000"):
 
     try:
         # 测试根路径
-        print(f"\n1. 测试根路径: {base_url}/")
-        response = httpx.get(f"{base_url}/", timeout=5.0)
+        print(f"\n1. 测试根路径: {base_url}/health")
+        response = httpx.get(f"{base_url}/health", timeout=5.0)
         print(f"   状态码: {response.status_code}")
         print(f"   响应: {response.json()}")
         assert response.status_code == 200
