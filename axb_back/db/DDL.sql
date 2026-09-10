@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS elders (
     password_hash VARCHAR(255) NOT NULL COMMENT '密码哈希',
     health_info TEXT COMMENT '健康信息',
     interests TEXT COMMENT '兴趣爱好',
-    wechat_webhook_url TEXT NOT NULL DEFAULT '' COMMENT '企业微信Webhook URL',
+    wechat_webhook_url VARCHAR(500) COMMENT '企业微信Webhook URL',
     avatar_url TEXT COMMENT '头像URL',
     last_login_at DATETIME COMMENT '最后登录时间',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -39,15 +39,15 @@ CREATE TABLE IF NOT EXISTS profiles (
     id INT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
     user_id INT NOT NULL COMMENT '关联的子女用户ID',
     elder_id INT NOT NULL COMMENT '关联的老人ID',
-    relationship VARCHAR(50) NOT NULL COMMENT '关系（如：父亲、母亲）',
+    relationship VARCHAR(50) DEFAULT '' COMMENT '关系（如：父亲、母亲）',
     emergency_contact VARCHAR(20) COMMENT '紧急联系人电话',
     notes TEXT COMMENT '备注信息',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (elder_id) REFERENCES elders(id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id),
-    INDEX idx_elder_id (elder_id)
+    INDEX idx_elder_id (elder_id),
+    CONSTRAINT fk_profiles_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_profiles_elder FOREIGN KEY (elder_id) REFERENCES elders(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='家庭档案表';
 
 -- 行程表
@@ -61,11 +61,11 @@ CREATE TABLE IF NOT EXISTS trips (
     pass_token VARCHAR(255) COMMENT '动态通行码',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
-    FOREIGN KEY (elder_id) REFERENCES elders(id) ON DELETE CASCADE,
     INDEX idx_profile_id (profile_id),
     INDEX idx_elder_id (elder_id),
-    INDEX idx_travel_date (travel_date)
+    INDEX idx_travel_date (travel_date),
+    CONSTRAINT fk_trips_profile FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
+    CONSTRAINT fk_trips_elder FOREIGN KEY (elder_id) REFERENCES elders(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='行程表';
 
 -- 代际任务表
@@ -79,10 +79,10 @@ CREATE TABLE IF NOT EXISTS tasks (
     elder_completed BOOLEAN NOT NULL DEFAULT FALSE COMMENT '老人是否已完成',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_trip_id (trip_id),
-    INDEX idx_user_id (user_id)
+    INDEX idx_user_id (user_id),
+    CONSTRAINT fk_tasks_trip FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
+    CONSTRAINT fk_tasks_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='代际任务表';
 
 -- 紧急求助表
@@ -95,11 +95,11 @@ CREATE TABLE IF NOT EXISTS sos_requests (
     status VARCHAR(50) NOT NULL DEFAULT 'pending' COMMENT '状态：pending/handled/resolved',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     resolved_at DATETIME COMMENT '解决时间',
-    FOREIGN KEY (elder_id) REFERENCES elders(id) ON DELETE CASCADE,
-    FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE SET NULL,
     INDEX idx_elder_id (elder_id),
     INDEX idx_status (status),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    CONSTRAINT fk_sos_elder FOREIGN KEY (elder_id) REFERENCES elders(id) ON DELETE CASCADE,
+    CONSTRAINT fk_sos_trip FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='紧急求助表';
 
 -- 回忆卡片表
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS memory_cards (
     image_url TEXT COMMENT '卡片图片URL',
     card_json TEXT NOT NULL COMMENT '卡片数据JSON',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
     INDEX idx_trip_id (trip_id),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    CONSTRAINT fk_cards_trip FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='回忆卡片表';
