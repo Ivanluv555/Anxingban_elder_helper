@@ -121,12 +121,24 @@ app.include_router(card_elder_router)
 app.include_router(guide_router)
 
 
+@app.get("/", tags=["欢迎"])
+async def root():
+    """根路径 - 欢迎信息"""
+    return {
+        "message": "欢迎使用安行伴后端服务",
+        "app": settings.app_name,
+        "version": "2.0.0"
+    }
+
+
 @app.get("/health", tags=["健康检查"])
 async def health_check():
-    """健康检查端点"""
+    """健康检查端点 - 返回完整的健康状态信息"""
     return {
         "status": "healthy",
-        "environment": settings.environment
+        "app": settings.app_name,
+        "environment": settings.environment,
+        "message": "安行伴后端服务运行中"
     }
 
 
