@@ -17,6 +17,7 @@ class UserEntity(Base):
     phone: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, comment="手机号")
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False, comment="密码哈希")
     avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True, comment="头像URL")
+    role: Mapped[str] = mapped_column(String(20), nullable=False, default="user", comment="角色：user/admin")
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, comment="最后登录时间")
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
@@ -33,4 +34,4 @@ class UserEntity(Base):
     )
 
     def __repr__(self):
-        return f"<UserEntity(id={self.id}, nickname={self.nickname}, phone={self.phone})>"
+        return f"<UserEntity(id={self.id}, nickname={self.nickname}, phone={self.phone}, role={self.role})>"

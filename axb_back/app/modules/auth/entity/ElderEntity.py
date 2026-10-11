@@ -20,6 +20,7 @@ class ElderEntity(Base):
     interests: Mapped[str | None] = mapped_column(Text, nullable=True, comment="兴趣爱好")
     wechat_webhook_url: Mapped[str] = mapped_column(Text, nullable=False, default="", comment="企业微信Webhook URL")
     avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True, comment="头像URL")
+    role: Mapped[str] = mapped_column(String(20), nullable=False, default="elder", comment="角色：elder/admin")
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, comment="最后登录时间")
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
@@ -36,4 +37,4 @@ class ElderEntity(Base):
     )
 
     def __repr__(self):
-        return f"<ElderEntity(id={self.id}, name={self.name}, phone={self.phone})>"
+        return f"<ElderEntity(id={self.id}, name={self.name}, phone={self.phone}, role={self.role})>"

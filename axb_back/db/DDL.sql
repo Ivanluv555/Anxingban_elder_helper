@@ -1,10 +1,7 @@
 -- 安行伴数据库结构定义
 -- MySQL 8.0+
 
--- 创建数据库
-CREATE DATABASE IF NOT EXISTS anxingban CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE anxingban;
-
+use anxingban;
 -- 子女用户表
 CREATE TABLE IF NOT EXISTS users (
     id INT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',

@@ -3,7 +3,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.openapi.docs import get_redoc_html
+from fastapi.security import HTTPBearer
 
 from app.config import get_settings
 from app.database import init_db
@@ -25,6 +27,9 @@ from app.modules.sos.controller.SOSElderController import router as sos_elder_ro
 from app.modules.guide.controller.GuideController import router as guide_router
 
 settings = get_settings()
+
+# 定义安全方案（用于Swagger UI）
+security = HTTPBearer()
 
 
 @asynccontextmanager
@@ -50,8 +55,8 @@ app = FastAPI(
     description="安行伴后端API - 帮助子女与长辈实现协同建档、行程安全保障、代际互动和回忆沉淀",
     version="2.0.0",
     lifespan=lifespan,
-    docs_url="/docs",
-    redoc_url="/redoc"
+    docs_url=None,  # 禁用默认docs，使用自定义暗色版本
+    redoc_url=None  # 禁用默认redoc，使用自定义版本
 )
 
 # 配置CORS
@@ -119,6 +124,43 @@ app.include_router(card_elder_router)
 
 # 景点讲解
 app.include_router(guide_router)
+
+# 配置自定义OpenAPI Schema（添加JWT认证支持）
+from app.openapi_config import custom_openapi_schema
+app.openapi = lambda: custom_openapi_schema(app)
+
+
+# 自定义Swagger UI（标准亮色主题 + JWT认证支持）
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html():
+    """自定义Swagger UI - 标准主题 + JWT认证"""
+    from fastapi.openapi.docs import get_swagger_ui_html
+
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title=f"{app.title} - API文档",
+        swagger_favicon_url="https://fastapi.tiangolo.com/img/favicon.png",
+        swagger_ui_parameters={
+            "persistAuthorization": True,  # 持久化认证
+            "displayRequestDuration": True,  # 显示请求耗时
+            "filter": True,  # 启用搜索过滤
+            "deepLinking": True,  # 深度链接
+            "docExpansion": "list",  # 默认展开列表
+            "defaultModelsExpandDepth": 1,  # 模型展开深度
+        }
+    )
+
+
+# 自定义ReDoc（标准主题）
+@app.get("/redoc", include_in_schema=False)
+async def custom_redoc_html():
+    """自定义ReDoc - 暗色主题"""
+    return get_redoc_html(
+        openapi_url=app.openapi_url,
+        title=f"{app.title} - ReDoc",
+        redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js",
+        with_google_fonts=False
+    )
 
 
 @app.get("/", tags=["欢迎"])
